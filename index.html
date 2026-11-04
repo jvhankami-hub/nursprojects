@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blank</title>
+  <link rel="preload" href="images/module2-bg.png" as="image">
+  <script type="module" src="https://unpkg.com/@google/model-viewer@3.4.0/dist/model-viewer.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #000;
+      overflow: hidden;
+    }
+
+    .stage,
+    .page {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* module 1 page: whale background, original file used as-is (no recompression) */
+    .page.module-1 {
+      background-color: #062a6b;
+    }
+
+    /* module 2 page: hospital room background, original file used as-is */
+    .page.module-2 {
+      background-color: #062a6b;
+      background-image: url('images/module2-bg.png');
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+    }
+
+    /* 3D model standing in the module 2 hospital room; JS places it next to the bed */
+    .scene-model {
+      display: none;
+      position: absolute;
+      background: transparent;
+      --poster-color: transparent;
+    }
+
+    .page.module-2 .scene-model {
+      display: block;
+    }
+
+    /* looping background video, only shown on module 1 */
+    .bg-video {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .page.module-1 .bg-video {
+      display: block;
+    }
+
+    /* question bubbles that fly in after the countdown and bounce off the screen edges */
+    .float-layer {
+      display: none;
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    .page.module-1 .float-layer {
+      display: block;
+    }
+
+    .floater {
+      position: absolute;
+      top: 0;
+      left: 0;
+      will-change: transform;
+      cursor: pointer;
+    }
+
+    .floater-squish {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* font-size is set to a tenth of the bubble's size in JS, so these em shadows scale with it */
+    .floater-ball {
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      /* brighter aqua shade than the menu bubbles so they pop against the video */
+      background:
+        radial-gradient(circle at 65% 95%, rgba(220, 255, 255, 0.7) 0%, transparent 35%),
+        radial-gradient(circle at 32% 28%, #ffffff 0%, #ffffff 15%, #eef9ff 35%, #cdeeff 60%, #a6ddff 82%, #86ccfa 100%);
+      box-shadow:
+        /* thin white rim and a strong bright glow */
+        0 0 0 0.15em rgba(255, 255, 255, 0.85),
+        0 0 2.5em rgba(140, 240, 255, 0.85),
+        0 0 5em rgba(255, 255, 255, 0.35),
+        inset -0.6em -0.9em 1.4em rgba(60, 140, 210, 0.25),
+        inset 0.25em 0.35em 0.6em rgba(255, 255, 255, 0.8);
+      animation: wobble 2.6s ease-in-out infinite;
+    }
+
+    @keyframes wobble {
+      0%, 100% { transform: scale(1, 1); }
+      25%      { transform: scale(1.05, 0.95); }
+      50%      { transform: scale(1, 1); }
+      75%      { transform: scale(0.95, 1.05); }
+    }
+
+    /* squish against the wall it just hit */
+    .floater-squish.hit-x { animation: squish-x 0.4s ease-out; }
+    .floater-squish.hit-y { animation: squish-y 0.4s ease-out; }
+
+    @keyframes squish-x {
+      0%   { transform: scale(1, 1); }
+      30%  { transform: scale(0.8, 1.15); }
+      65%  { transform: scale(1.06, 0.95); }
+      100% { transform: scale(1, 1); }
+    }
+
+    @keyframes squish-y {
+      0%   { transform: scale(1, 1); }
+      30%  { transform: scale(1.15, 0.8); }
+      65%  { transform: scale(0.95, 1.06); }
+      100% { transform: scale(1, 1); }
+    }
+
+    /* question view: the popped bubble zooms up to the middle and the answers pop in below it */
+    .quiz {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      padding: 16px;
+      box-sizing: border-box;
+      background: rgba(2, 20, 60, 0.55);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      animation: quiz-bg-in 0.5s ease-out both;
+    }
+
+    .quiz.closing {
+      animation: quiz-bg-out 0.4s ease-in forwards;
+    }
+
+    @keyframes quiz-bg-in  { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes quiz-bg-out { from { opacity: 1; } to { opacity: 0; } }
+
+    .quiz-bubble {
+      position: relative;
+      flex: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-origin: 0 0;
+    }
+
+    .quiz-bubble.popping {
+      transform-origin: center;
+      animation: quiz-pop 0.35s ease-out forwards;
+    }
+
+    @keyframes quiz-pop {
+      to { transform: scale(1.4); opacity: 0; }
+    }
+
+    .quiz-question {
+      position: relative;
+      z-index: 1;
+      padding: 0 14%;
+      text-align: center;
+      font-family: 'Fredoka', sans-serif;
+      font-size: clamp(18px, 2.4vw, 30px);
+      font-weight: 700;
+      line-height: 1.2;
+      color: #062a6b;
+      animation: fade-up 0.5s ease-out 0.55s backwards;
+    }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .quiz-answers {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 340px));
+      justify-content: center;
+      gap: 16px;
+      width: 100%;
+    }
+
+    @media (max-width: 640px) {
+      .quiz-answers {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .answer,
+    .continue {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      border: 3px solid #ffffff;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #ffffff 0%, #e6f6ff 50%, #bfe6ff 100%);
+      box-shadow:
+        0 0 18px rgba(140, 240, 255, 0.6),
+        0 8px 16px rgba(0, 0, 0, 0.35),
+        inset 0 -4px 8px rgba(60, 140, 210, 0.25);
+      font-family: 'Fredoka', sans-serif;
+      font-size: clamp(15px, 1.6vw, 20px);
+      font-weight: 500;
+      color: #062a6b;
+      text-align: left;
+      cursor: pointer;
+      animation: answer-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+      transition: transform 0.15s, opacity 0.2s;
+    }
+
+    .answer:hover:not(:disabled),
+    .continue:hover {
+      transform: scale(1.04);
+    }
+
+    .answer:disabled {
+      cursor: default;
+    }
+
+    @keyframes answer-pop {
+      from { opacity: 0; transform: scale(0.3); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .answer-letter {
+      flex: none;
+      display: grid;
+      place-items: center;
+      width: 2em;
+      height: 2em;
+      border-radius: 50%;
+      background: #2a78e0;
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .answer.correct { background: linear-gradient(180deg, #eafff0, #b9f5cd); border-color: #3ccf73; }
+    .answer.correct .answer-letter { background: #1fa557; }
+    .answer.wrong   { background: linear-gradient(180deg, #fff0f0, #ffc9c9); border-color: #ff6b6b; }
+    .answer.wrong .answer-letter { background: #e04444; }
+    .answer.dim     { opacity: 0.5; }
+
+    .quiz-feedback {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      text-align: center;
+      font-family: 'Fredoka', sans-serif;
+      font-size: clamp(20px, 2.4vw, 30px);
+      font-weight: 700;
+      color: #ffffff;
+      text-shadow:
+        0 0 3px #062a6b,
+        0 0 8px rgba(11, 58, 140, 0.9),
+        0 3px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    .quiz-feedback:empty {
+      display: none;
+    }
+
+    .quiz-feedback > div {
+      animation: fade-up 0.4s ease-out backwards;
+    }
+
+    .continue {
+      font-weight: 700;
+      padding: 12px 32px;
+      text-shadow: none;
+    }
+
+    /* temporary skip button for testing; only shown during the module 1 intro */
+    .skip {
+      display: none;
+      position: absolute;
+      right: 24px;
+      bottom: 24px;
+      z-index: 2;
+      padding: 12px 28px;
+      border: 3px solid #ffffff;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #7bbcff 0%, #2a78e0 60%, #0b3a8c 100%);
+      box-shadow:
+        0 0 20px rgba(74, 158, 255, 0.45),
+        0 10px 18px rgba(0, 0, 0, 0.6),
+        inset 0 3px 6px rgba(255, 255, 255, 0.5);
+      font-family: 'Fredoka', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+      cursor: pointer;
+      animation: pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+      transition: transform 0.15s;
+    }
+
+    .skip:hover { transform: scale(1.06); }
+
+    .page.module-1 .skip {
+      display: block;
+    }
+
+    .page.intro-done .skip,
+    .page.intro-done .intro {
+      display: none;
+    }
+
+    /* intro captions on module 1: each rises in, holds, then fades out, one after the other */
+    .intro {
+      display: none;
+      position: absolute;
+      inset: 0;
+      place-items: center;
+      padding: 0 16px;
+      pointer-events: none;
+    }
+
+    .page.module-1 .intro {
+      display: grid;
+    }
+
+    .caption {
+      grid-area: 1 / 1;
+      max-width: 900px;
+      text-align: center;
+      font-family: 'Fredoka', sans-serif;
+      font-size: clamp(32px, 5.5vw, 68px);
+      font-weight: 700;
+      line-height: 1.2;
+      color: #ffffff;
+      text-shadow:
+        0 0 3px #062a6b,
+        0 0 6px #062a6b,
+        0 0 14px rgba(11, 58, 140, 0.9),
+        0 0 30px rgba(11, 58, 140, 0.6),
+        0 4px 6px rgba(0, 0, 0, 0.8);
+      opacity: 0;
+      animation: caption 4s ease-in-out both;
+    }
+
+    .caption.first  { animation-delay: 0.4s; }
+    .caption.second { animation-delay: 4.6s; }
+
+    /* 3-2-1 countdown after the captions */
+    .count {
+      font-size: clamp(120px, 20vw, 240px);
+      line-height: 1;
+      animation: count 1s ease-out both;
+    }
+
+    .count.three { animation-delay: 8.8s; }
+    .count.two   { animation-delay: 9.8s; }
+    .count.one   { animation-delay: 10.8s; }
+
+    @keyframes count {
+      0%   { opacity: 0; transform: scale(0.4); }
+      25%  { opacity: 1; transform: scale(1.1); }
+      70%  { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(1.4); }
+    }
+
+    @keyframes caption {
+      0%   { opacity: 0; transform: translateY(40px); }
+      20%  { opacity: 1; transform: translateY(0); }
+      75%  { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-20px); }
+    }
+    .welcome {
+      position: absolute;
+      top: 7vh;
+      left: 0;
+      right: 0;
+      padding: 0 16px;
+      text-align: center;
+      font-family: 'Fredoka', sans-serif;
+      animation: pop-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+    }
+
+    /* group credits in the bottom left, styled like the header text */
+    .credits {
+      position: absolute;
+      left: 24px;
+      bottom: 24px;
+      font-family: 'Fredoka', sans-serif;
+      color: #ffffff;
+      line-height: 1.4;
+      animation: pop-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+    }
+
+    .credits-inner {
+      animation: text-float 3s ease-in-out 1.2s infinite;
+    }
+
+    .credits h2,
+    .credits li {
+      text-shadow:
+        0 0 2px #062a6b,
+        0 0 3px #062a6b,
+        0 0 8px rgba(11, 58, 140, 0.9),
+        0 0 16px rgba(11, 58, 140, 0.6),
+        0 3px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    .credits h2 {
+      margin: 0 0 6px;
+      font-size: clamp(16px, 1.6vw, 22px);
+      font-weight: 700;
+    }
+
+    .credits ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      font-size: clamp(13px, 1.2vw, 17px);
+      font-weight: 500;
+    }
+
+    /* when a bubble is clicked, the text collapses in on itself */
+    .welcome.implode,
+    .credits.implode {
+      animation: implode 0.55s cubic-bezier(0.55, 0, 0.75, 0) forwards;
+    }
+
+    @keyframes implode {
+      0%   { transform: scale(1);    opacity: 1; filter: blur(0); }
+      20%  { transform: scale(1.05); opacity: 1; filter: blur(0); }
+      100% { transform: scale(0);    opacity: 0; filter: blur(6px); }
+    }
+
+    .welcome h1,
+    .welcome p {
+      margin: 0;
+      /* glossy white-to-blue fill, same palette as the bubbles */
+      background: linear-gradient(180deg, #ffffff 0%, #dff0ff 35%, #7bbcff 70%, #2a78e0 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter:
+        drop-shadow(0 0 18px rgba(74, 158, 255, 0.45))
+        drop-shadow(0 4px 4px rgba(0, 0, 0, 0.6));
+    }
+
+    /* gentle bobbing, same as the bubbles; the subtitle is offset so they don't move in lockstep */
+    .welcome h1 { animation: text-float 3s ease-in-out infinite; }
+    .welcome p  { animation: text-float 3s ease-in-out 0.6s infinite; }
+
+    @keyframes text-float {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-10px); }
+    }
+
+    .welcome h1 {
+      font-size: clamp(30px, 5.5vw, 64px);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      /* white inside, dark navy shade around the outside of each letter */
+      background: none;
+      color: #ffffff;
+      filter: none;
+      text-shadow:
+        0 0 2px #062a6b,
+        0 0 4px #062a6b,
+        0 0 10px rgba(11, 58, 140, 0.9),
+        0 0 22px rgba(11, 58, 140, 0.6),
+        0 4px 6px rgba(0, 0, 0, 0.8);
+    }
+
+    .welcome p {
+      margin-top: 10px;
+      font-size: clamp(16px, 2.2vw, 26px);
+      font-weight: 500;
+      /* same look as the heading: white inside, dark navy shade outside */
+      background: none;
+      color: #ffffff;
+      filter: none;
+      text-shadow:
+        0 0 2px #062a6b,
+        0 0 3px #062a6b,
+        0 0 8px rgba(11, 58, 140, 0.9),
+        0 0 16px rgba(11, 58, 140, 0.6),
+        0 3px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    /* shared glossy sphere look, used by the big bubbles and the back button */
+    .sphere {
+      position: absolute;
+      border-radius: 50%;
+      background:
+        /* bounced light from below */
+        radial-gradient(circle at 65% 95%, rgba(170, 215, 255, 0.55) 0%, transparent 35%),
+        /* main body shading: light top-left, dark bottom-right */
+        radial-gradient(circle at 32% 28%, #ffffff 0%, #dff0ff 18%, #7bbcff 45%, #2a78e0 70%, #0b3a8c 92%, #062a6b 100%);
+    }
+
+    /* sharp glossy highlight */
+    .sphere::before {
+      content: "";
+      position: absolute;
+      top: 10%;
+      left: 18%;
+      width: 34%;
+      height: 22%;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.4) 50%, transparent 75%);
+      transform: rotate(-30deg);
+      filter: blur(1px);
+    }
+
+    /* small secondary reflection on the lower right */
+    .sphere::after {
+      content: "";
+      position: absolute;
+      bottom: 14%;
+      right: 18%;
+      width: 14%;
+      height: 8%;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.35);
+      transform: rotate(-35deg);
+      filter: blur(2px);
+    }
+
+    .bubble {
+      --size: min(26vw, 260px);
+      top: 50%;
+      left: 50%;
+      width: var(--size);
+      height: var(--size);
+      margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
+      cursor: pointer;
+      box-shadow:
+        /* outer glow */
+        0 0 60px rgba(74, 158, 255, 0.45),
+        /* drop shadow for depth */
+        0 30px 50px rgba(0, 0, 0, 0.6),
+        /* darkened edge */
+        inset -18px -24px 40px rgba(2, 20, 70, 0.55),
+        /* thin bright rim on the lit side */
+        inset 6px 8px 14px rgba(255, 255, 255, 0.6);
+      transform: translateX(0) scale(0);
+      animation:
+        pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+        spread 1s cubic-bezier(0.65, 0, 0.35, 1) 0.9s forwards,
+        float 3s ease-in-out 2s infinite;
+    }
+
+    /* hover: looks like the bubble is being pressed down.
+       uses scale/translate instead of transform so it stacks on top of the float animation */
+    .bubble {
+      transition:
+        scale 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+        translate 0.25s ease-out,
+        box-shadow 0.25s ease-out,
+        filter 0.25s ease-out;
+    }
+
+    .bubble:not(.burst):not(.fade):hover {
+      scale: 1.04 0.9;
+      /* the horizontal part cancels the sideways drift the 1.04 scale adds to the left/right bubbles */
+      translate: calc(var(--x) * -0.04) 8px;
+      filter: brightness(0.92);
+      box-shadow:
+        0 0 35px rgba(74, 158, 255, 0.35),
+        /* shadow tightens because it's closer to the ground */
+        0 10px 20px rgba(0, 0, 0, 0.7),
+        inset -12px -30px 45px rgba(2, 20, 70, 0.65),
+        inset 4px 4px 10px rgba(255, 255, 255, 0.45);
+    }
+
+    .bubble.left   { --x: -135%; animation-delay: 0s,    0.9s, 2s; }
+    .bubble.middle { --x: 0%;    animation-delay: 0.15s, 0.9s, 2.4s; }
+    .bubble.right  { --x: 135%;  animation-delay: 0.3s,  0.9s, 2.8s; }
+
+    /* big number inside each bubble, in the bubble's own white-to-blue shade */
+    .bubble {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .number {
+      font-family: 'Fredoka', sans-serif;
+      font-size: calc(var(--size) * 0.55);
+      font-weight: 700;
+      line-height: 1;
+      background: linear-gradient(160deg, #ffffff 0%, #dff0ff 25%, #7bbcff 55%, #2a78e0 80%, #0b3a8c 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      /* dark navy edge so the number reads against the bubble */
+      filter:
+        drop-shadow(0 0 2px #062a6b)
+        drop-shadow(0 4px 6px rgba(2, 20, 70, 0.7));
+      user-select: none;
+    }
+
+    /* module 2 bubble shows a photo inside, with the bubble's shine and blue edge layered over it */
+    .bubble.middle {
+      background:
+        radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.3) 0%, transparent 40%),
+        radial-gradient(circle, transparent 55%, rgba(42, 120, 224, 0.55) 85%, rgba(6, 42, 107, 0.85) 100%),
+        url('images/module2-bubble.png') center 30% / cover no-repeat;
+    }
+
+    /* module 1 bubble is a 3D model; drop the drawn sphere so only the model shows.
+       the bubble element still handles the animations, hover and click */
+    .bubble.has-model {
+      background: none;
+      box-shadow: none !important;
+    }
+
+    .bubble.has-model::before,
+    .bubble.has-model::after {
+      display: none;
+    }
+
+    .bubble model-viewer {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      pointer-events: none;
+      --poster-color: transparent;
+    }
+
+    /* module name under a bubble; same width and animations as the bubble so it travels with it */
+    .label {
+      --size: min(26vw, 260px);
+      position: absolute;
+      top: calc(50% + var(--size) / 2 + 28px);
+      left: 50%;
+      width: var(--size);
+      margin-left: calc(var(--size) / -2);
+      text-align: center;
+      font-family: 'Fredoka', sans-serif;
+      font-size: clamp(14px, 1.8vw, 22px);
+      font-weight: 500;
+      color: #ffffff;
+      pointer-events: none;
+      text-shadow:
+        0 0 2px #062a6b,
+        0 0 3px #062a6b,
+        0 0 8px rgba(11, 58, 140, 0.9),
+        0 0 16px rgba(11, 58, 140, 0.6),
+        0 3px 4px rgba(0, 0, 0, 0.8);
+      transform: translateX(var(--x));
+      /* waits until the bubbles have spread out, then fades in and floats along with its bubble */
+      animation:
+        label-fade-in 0.8s ease-out 1.9s backwards,
+        float 3s ease-in-out 2s infinite;
+    }
+
+    /* float delays match each bubble's so the label bobs in step with it */
+    .label.left   { --x: -135%; animation-delay: 1.9s, 2s; }
+    .label.middle { --x: 0%;    animation-delay: 1.9s, 2.4s; }
+    .label.right  { --x: 135%;  animation-delay: 1.9s, 2.8s; }
+
+    @keyframes label-fade-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .label.implode {
+      animation: label-implode 0.55s cubic-bezier(0.55, 0, 0.75, 0) forwards;
+    }
+
+    @keyframes label-implode {
+      0%   { transform: translateX(var(--x)) scale(1);    opacity: 1; filter: blur(0); }
+      20%  { transform: translateX(var(--x)) scale(1.05); opacity: 1; filter: blur(0); }
+      100% { transform: translateX(var(--x)) scale(0);    opacity: 0; filter: blur(6px); }
+    }
+
+    .bubble.burst {
+      animation: burst 0.35s ease-out forwards;
+    }
+
+    .bubble.fade {
+      animation: fade 0.4s ease-out forwards;
+    }
+
+    @keyframes pop {
+      0%   { transform: translateX(0) scale(0); }
+      100% { transform: translateX(0) scale(1); }
+    }
+
+    @keyframes spread {
+      from { transform: translateX(0) scale(1); }
+      to   { transform: translateX(var(--x)) scale(1); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateX(var(--x)) translateY(0) scale(1); }
+      50%      { transform: translateX(var(--x)) translateY(-12px) scale(1); }
+    }
+
+    @keyframes burst {
+      0%   { transform: translateX(var(--x)) scale(1);    opacity: 1; }
+      40%  { transform: translateX(var(--x)) scale(1.15); opacity: 1; }
+      100% { transform: translateX(var(--x)) scale(1.5);  opacity: 0; }
+    }
+
+    @keyframes fade {
+      to { transform: translateX(var(--x)) scale(0.8); opacity: 0; }
+    }
+
+    /* droplets that fly out when a bubble bursts */
+    .droplet {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #ffffff, #7bbcff 60%, #2a78e0);
+      pointer-events: none;
+      z-index: 6;
+      animation: fly 0.6s ease-out forwards;
+    }
+
+    @keyframes fly {
+      from { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      to   { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.2); opacity: 0; }
+    }
+
+    .back {
+      top: 24px;
+      left: 24px;
+      width: 64px;
+      height: 64px;
+      padding: 0;
+      /* solid white outline so the button stands out on busy backgrounds */
+      border: 3px solid #ffffff;
+      box-sizing: border-box;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 0 20px rgba(74, 158, 255, 0.45),
+        0 10px 18px rgba(0, 0, 0, 0.6),
+        inset -5px -7px 12px rgba(2, 20, 70, 0.55),
+        inset 2px 3px 5px rgba(255, 255, 255, 0.6);
+      animation: pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+      transition: transform 0.15s;
+    }
+
+    .back-label {
+      position: absolute;
+      top: 94px;
+      left: 24px;
+      width: 64px;
+      text-align: center;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      text-shadow:
+        0 0 2px #062a6b,
+        0 0 3px #062a6b,
+        0 0 8px rgba(11, 58, 140, 0.9),
+        0 2px 3px rgba(0, 0, 0, 0.8);
+      pointer-events: none;
+      animation: pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+    }
+
+    .back:hover  { transform: scale(1.08); }
+    .back:active { transform: scale(0.95); }
+
+    .back svg {
+      position: relative;
+      z-index: 1;
+      width: 28px;
+      height: 28px;
+    }
+
+    @keyframes pop-in {
+      from { transform: scale(0); }
+      to   { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage" id="home">
+    <div class="welcome">
+      <h1>Welcome Nursing-101 Class</h1>
+      <p>please choose the first module you would like to begin with.</p>
+    </div>
+    <div class="sphere bubble left has-model" data-module="1">
+      <model-viewer src="images/bubble.glb" auto-rotate rotation-per-second="20deg"
+        interaction-prompt="none" disable-zoom environment-image="neutral" exposure="1.1"
+        loading="eager" alt="3D bubble for module 1"></model-viewer>
+    </div>
+    <div class="sphere bubble middle" data-module="2"><span class="number">2</span></div>
+    <div class="sphere bubble right" data-module="3"><span class="number">3</span></div>
+    <div class="label left">Understanding Culture &amp; Diversity</div>
+    <div class="label middle">Communication &amp; Relational Practice</div>
+    <div class="label right">Cultural Safety in Nursing</div>
+
+    <div class="credits">
+      <div class="credits-inner">
+        <h2>Group 1 (Chapters 7, 8)</h2>
+        <ul>
+          <li>Neige Kerr</li>
+          <li>Jvhan 67</li>
+          <li>Gurjeevan Mattu</li>
+          <li>Damanpreet Sidhu</li>
+          <li>Victoria Ude</li>
+          <li>Maddix Burgess</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="page hidden" id="page">
+    <video class="bg-video" id="bg-video" src="images/155553-810322535_medium.mp4" muted loop playsinline preload="auto"></video>
+    <div class="float-layer" id="float-layer"></div>
+    <model-viewer class="scene-model" id="scene-model" src="images/ComfyUI_00002%20(1).glb"
+      camera-controls disable-zoom interaction-prompt="none" environment-image="neutral"
+      shadow-intensity="1" loading="lazy" alt="3D model beside the hospital bed"></model-viewer>
+    <button class="sphere back" id="back" aria-label="Go back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#062a6b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7" />
+      </svg>
+    </button>
+    <div class="back-label">Return</div>
+
+    <div class="intro">
+      <div class="caption first">Pop a bubble and answer the question!</div>
+      <div class="caption second">The bigger the bubble, the harder the question.</div>
+      <div class="caption count three">3</div>
+      <div class="caption count two">2</div>
+      <div class="caption count one">1</div>
+    </div>
+
+    <button class="skip" id="skip">Skip ▸</button>
+  </div>
+
+  <script>
+    const home = document.getElementById('home');
+    const page = document.getElementById('page');
+    const back = document.getElementById('back');
+    const welcome = document.querySelector('.welcome');
+    const credits = document.querySelector('.credits');
+    const bgVideo = document.getElementById('bg-video');
+    const bubbles = document.querySelectorAll('.bubble');
+    const labels = document.querySelectorAll('.label');
+    let busy = false;
+
+    // ---- module 1 question bubbles ----
+    const floatLayer = document.getElementById('float-layer');
+    const FLOAT_START_DELAY = 11600; // just as the countdown's "1" fades
+    const FLOAT_KINDS = {
+      small:  { size: 60,  speed: 210 },
+      medium: { size: 110, speed: 150 },
+      big:    { size: 175, speed: 100 },
+    };
+    let floaters = [];
+    let floatStartTimer = null;
+    let floatFrame = null;
+    let lastFrameTime = 0;
+    let floatSession = 0; // bumped on stop so leftover spawn timers do nothing
+    let quizOpen = false;
+
+    // questions per bubble size; each one goes on a random bubble of that size.
+    // `answer` is the index of the correct choice (0 = A).
+    const QUESTIONS = {
+      small: [
+        {
+          question: 'What is cultural sensitivity in nursing?',
+          choices: [
+            'Treating all patients exactly the same',
+            'Recognizing and respecting cultural differences',
+            "Learning every patient's language",
+            'Following only your own cultural beliefs',
+          ],
+          answer: 1,
+        },
+        {
+          question: 'What does stereotyping mean?',
+          choices: [
+            "Understanding someone's individual experiences",
+            'Respecting different cultures',
+            'Making assumptions about someone based on their group',
+            'Asking patients about their beliefs',
+          ],
+          answer: 2,
+        },
+        {
+          question: 'Which three groups are recognized as Indigenous peoples in Canada?',
+          choices: [
+            'First Nations, Métis, and Inuit',
+            'First Nations, Canadians, and Europeans',
+            'Inuit, immigrants, and Métis',
+            'Métis, French Canadians, and Inuit',
+          ],
+          answer: 0,
+        },
+        {
+          question: 'What is cultural humility?',
+          choices: [
+            'Knowing everything about another culture',
+            'Avoiding people from different cultures',
+            'Believing your culture is superior',
+            'Being open to learning from others and reflecting on your biases',
+          ],
+          answer: 3,
+        },
+        {
+          question: 'What is the purpose of a sharing circle?',
+          choices: [
+            'To allow one person to control the conversation',
+            'To provide a respectful space for sharing and listening',
+            'To replace all medical treatments',
+            'To make everyone agree on the same beliefs',
+          ],
+          answer: 1,
+        },
+      ],
+      medium: [],
+      big: [],
+    };
+
+    function rand(min, max) {
+      return min + Math.random() * (max - min);
+    }
+
+    function spawnFloater(kind, edge, question) {
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+      // shrink everything on small screens but keep the three sizes clearly apart
+      const scale = Math.min(1, Math.max(0.55, W / 1300));
+      const size = FLOAT_KINDS[kind].size * scale;
+      const speed = FLOAT_KINDS[kind].speed * rand(0.85, 1.15);
+
+      // start just off-screen on the chosen edge
+      let x, y;
+      if (edge === 0)      { x = rand(0, W - size); y = -size; }
+      else if (edge === 1) { x = W;                 y = rand(0, H - size); }
+      else if (edge === 2) { x = rand(0, W - size); y = H; }
+      else                 { x = -size;             y = rand(0, H - size); }
+
+      // aim at a random spot in the middle area of the screen
+      const tx = rand(W * 0.2, W * 0.8) - size / 2;
+      const ty = rand(H * 0.2, H * 0.8) - size / 2;
+      const dist = Math.hypot(tx - x, ty - y) || 1;
+
+      const el = document.createElement('div');
+      el.className = 'floater ' + kind;
+      el.style.width = size + 'px';
+      el.style.height = size + 'px';
+      el.style.fontSize = size / 10 + 'px';
+      el.innerHTML = '<div class="floater-squish"><div class="sphere floater-ball"></div></div>';
+      el.querySelector('.floater-ball').style.animationDelay = -rand(0, 2.6) + 's';
+      floatLayer.appendChild(el);
+
+      const f = {
+        el,
+        squish: el.firstChild,
+        size,
+        x,
+        y,
+        vx: (tx - x) / dist * speed,
+        vy: (ty - y) / dist * speed,
+        entered: false,
+        question,
+      };
+      floaters.push(f);
+      el.addEventListener('pointerdown', () => popFloater(f));
+    }
+
+    function popFloater(f) {
+      if (quizOpen) return;
+      // bubbles without a question yet stay put and just give a little squish
+      if (!f.question) {
+        squish(f, Math.random() < 0.5 ? 'x' : 'y');
+        return;
+      }
+      floaters = floaters.filter(other => other !== f);
+      openQuiz(f);
+    }
+
+    function openQuiz(f) {
+      quizOpen = true;
+      const q = f.question;
+      const from = f.el.getBoundingClientRect();
+      f.el.remove();
+
+      const quiz = document.createElement('div');
+      quiz.className = 'quiz';
+      quiz.innerHTML = `
+        <div class="quiz-bubble">
+          <div class="sphere floater-ball"></div>
+          <div class="quiz-question"></div>
+        </div>
+        <div class="quiz-answers"></div>
+        <div class="quiz-feedback"></div>`;
+      quiz.querySelector('.quiz-question').textContent = q.question;
+
+      const qBubble = quiz.querySelector('.quiz-bubble');
+      const size = Math.min(window.innerWidth * 0.8, window.innerHeight * 0.45, 420);
+      qBubble.style.width = size + 'px';
+      qBubble.style.height = size + 'px';
+      qBubble.style.fontSize = size / 10 + 'px';
+
+      const answersEl = quiz.querySelector('.quiz-answers');
+      const feedback = quiz.querySelector('.quiz-feedback');
+      const buttons = q.choices.map((choice, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'answer';
+        btn.style.animationDelay = 0.8 + i * 0.12 + 's';
+        btn.innerHTML = `<span class="answer-letter">${'ABCD'[i]}</span><span></span>`;
+        btn.lastChild.textContent = choice;
+        btn.addEventListener('click', () => {
+          buttons.forEach((b, j) => {
+            b.disabled = true;
+            if (j === q.answer) b.classList.add('correct');
+            else if (j === i) b.classList.add('wrong');
+            else b.classList.add('dim');
+          });
+          const message = document.createElement('div');
+          message.textContent = i === q.answer
+            ? 'Correct!'
+            : `Not quite. The answer is ${'ABCD'[q.answer]}.`;
+          const next = document.createElement('button');
+          next.className = 'continue';
+          next.textContent = 'Continue';
+          next.addEventListener('click', () => closeQuiz(quiz, qBubble));
+          feedback.append(message, next);
+        });
+        answersEl.appendChild(btn);
+        return btn;
+      });
+
+      page.appendChild(quiz);
+
+      // zoom: start the big bubble exactly where the small one was, then let it grow into place
+      const to = qBubble.getBoundingClientRect();
+      qBubble.style.transform =
+        `translate(${from.left - to.left}px, ${from.top - to.top}px) scale(${from.width / to.width})`;
+      void qBubble.offsetWidth;
+      qBubble.style.transition = 'transform 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.1)';
+      qBubble.style.transform = '';
+    }
+
+    function closeQuiz(quiz, qBubble) {
+      spawnDroplets(qBubble, page);
+      qBubble.classList.add('popping');
+      quiz.classList.add('closing');
+      quiz.addEventListener('animationend', e => {
+        if (e.target !== quiz) return;
+        quiz.remove();
+        quizOpen = false;
+      });
+    }
+
+    function squish(f, axis) {
+      f.squish.classList.remove('hit-x', 'hit-y');
+      void f.squish.offsetWidth;
+      f.squish.classList.add('hit-' + axis);
+    }
+
+    function stepFloaters(time) {
+      const dt = Math.min((time - lastFrameTime) / 1000, 0.05);
+      lastFrameTime = time;
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+
+      // everything holds still while a question is open
+      if (quizOpen) {
+        floatFrame = requestAnimationFrame(stepFloaters);
+        return;
+      }
+
+      floaters.forEach(f => {
+        f.x += f.vx * dt;
+        f.y += f.vy * dt;
+
+        // walls only count once the bubble has fully flown onto the screen
+        if (!f.entered && f.x >= 0 && f.y >= 0 && f.x + f.size <= W && f.y + f.size <= H) {
+          f.entered = true;
+        }
+
+        if (f.entered) {
+          if (f.x < 0)          { f.x = 0;          f.vx =  Math.abs(f.vx); squish(f, 'x'); }
+          if (f.x + f.size > W) { f.x = W - f.size; f.vx = -Math.abs(f.vx); squish(f, 'x'); }
+          if (f.y < 0)          { f.y = 0;          f.vy =  Math.abs(f.vy); squish(f, 'y'); }
+          if (f.y + f.size > H) { f.y = H - f.size; f.vy = -Math.abs(f.vy); squish(f, 'y'); }
+        }
+
+        f.el.style.transform = `translate(${f.x}px, ${f.y}px)`;
+      });
+
+      floatFrame = requestAnimationFrame(stepFloaters);
+    }
+
+    function startFloaters() {
+      if (page.classList.contains('intro-done')) return;
+      page.classList.add('intro-done');
+      clearTimeout(floatStartTimer);
+
+      const kinds = [
+        ...Array(5).fill('small'),
+        ...Array(4).fill('medium'),
+        ...Array(3).fill('big'),
+      ].sort(() => Math.random() - 0.5);
+
+      // the order is already shuffled, so handing questions out in order lands them on random bubbles
+      const used = { small: 0, medium: 0, big: 0 };
+      const questions = kinds.map(kind => QUESTIONS[kind][used[kind]++]);
+
+      // release them one after another, cycling through top, right, bottom, left
+      const session = floatSession;
+      kinds.forEach((kind, i) => {
+        setTimeout(() => {
+          if (session === floatSession) spawnFloater(kind, i % 4, questions[i]);
+        }, i * 150);
+      });
+
+      lastFrameTime = performance.now();
+      floatFrame = requestAnimationFrame(stepFloaters);
+    }
+
+    function stopFloaters() {
+      floatSession++;
+      clearTimeout(floatStartTimer);
+      floatStartTimer = null;
+      cancelAnimationFrame(floatFrame);
+      floatFrame = null;
+      floaters = [];
+      floatLayer.innerHTML = '';
+      quizOpen = false;
+      page.querySelectorAll('.quiz').forEach(q => q.remove());
+    }
+
+    document.getElementById('skip').addEventListener('click', startFloaters);
+
+    // ---- module 2 model ----
+    // spot in the background image (in its own pixels) where the model stands: just right of the bed
+    const sceneModel = document.getElementById('scene-model');
+    const SCENE = { imgW: 1672, imgH: 941, centerX: 1060, floorY: 770, w: 380, h: 540 };
+
+    // the background uses `cover`, so work out how the image is scaled and cropped,
+    // then map the spot onto the screen so the model stays beside the bed at any window size
+    function placeSceneModel() {
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+      const s = Math.max(W / SCENE.imgW, H / SCENE.imgH);
+      const offX = (W - SCENE.imgW * s) / 2;
+      const offY = (H - SCENE.imgH * s) / 2;
+      sceneModel.style.width = SCENE.w * s + 'px';
+      sceneModel.style.height = SCENE.h * s + 'px';
+      sceneModel.style.left = offX + (SCENE.centerX - SCENE.w / 2) * s + 'px';
+      sceneModel.style.top = offY + (SCENE.floorY - SCENE.h) * s + 'px';
+    }
+
+    placeSceneModel();
+    window.addEventListener('resize', placeSceneModel);
+
+    function spawnDroplets(bubble, parent = home) {
+      const rect = bubble.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const count = 14;
+
+      for (let i = 0; i < count; i++) {
+        const angle = (i / count) * Math.PI * 2 + Math.random() * 0.4;
+        const distance = rect.width * (0.6 + Math.random() * 0.5);
+        const size = 6 + Math.random() * 14;
+        const drop = document.createElement('div');
+        drop.className = 'droplet';
+        drop.style.left = cx + 'px';
+        drop.style.top = cy + 'px';
+        drop.style.width = size + 'px';
+        drop.style.height = size + 'px';
+        drop.style.setProperty('--dx', Math.cos(angle) * distance + 'px');
+        drop.style.setProperty('--dy', Math.sin(angle) * distance + 'px');
+        parent.appendChild(drop);
+        drop.addEventListener('animationend', () => drop.remove());
+      }
+    }
+
+    bubbles.forEach(bubble => {
+      bubble.addEventListener('click', () => {
+        if (busy) return;
+        busy = true;
+
+        bubble.classList.add('burst');
+        welcome.classList.add('implode');
+        credits.classList.add('implode');
+        labels.forEach(label => label.classList.add('implode'));
+        spawnDroplets(bubble);
+        bubbles.forEach(other => {
+          if (other !== bubble) other.classList.add('fade');
+        });
+
+        setTimeout(() => {
+          home.classList.add('hidden');
+          page.className = 'page module-' + bubble.dataset.module;
+          if (bubble.dataset.module === '1') {
+            bgVideo.currentTime = 0;
+            bgVideo.play().catch(() => {});
+            floatStartTimer = setTimeout(startFloaters, FLOAT_START_DELAY);
+          }
+          busy = false;
+        }, 650);
+      });
+    });
+
+    back.addEventListener('click', () => {
+      page.className = 'page hidden';
+      bgVideo.pause();
+      stopFloaters();
+      home.classList.remove('hidden');
+      welcome.classList.remove('implode');
+      credits.classList.remove('implode');
+
+      // reset the bubbles so the intro animation plays again
+      labels.forEach(label => label.classList.remove('implode'));
+      [...bubbles, ...labels].forEach(el => {
+        el.classList.remove('burst', 'fade');
+        el.style.animation = 'none';
+        void el.offsetWidth;
+        el.style.animation = '';
+      });
+    });
+  </script>
+</body>
+</html>
