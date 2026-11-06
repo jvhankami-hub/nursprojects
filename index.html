@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Blank</title>
   <link rel="preload" href="images/module2-bg.png" as="image">
-  <script type="module" src="https://unpkg.com/@google/model-viewer@3.4.0/dist/model-viewer.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
@@ -30,6 +29,156 @@
       display: none;
     }
 
+    /* things that float or wobble forever get their own GPU layer, so their glows and text shadows
+       are drawn once and then just moved, instead of being repainted every frame */
+    .bubble,
+    .label,
+    .divider,
+    .welcome h1,
+    .welcome p,
+    .credits-inner,
+    .floater-squish,
+    .floater-ball {
+      will-change: transform;
+    }
+
+    /* music on/off button, bottom right of the main menu */
+    .music-btn {
+      position: absolute;
+      right: 24px;
+      bottom: 24px;
+      z-index: 3;
+      width: 56px;
+      height: 56px;
+      padding: 0;
+      border: 3px solid #ffffff;
+      border-radius: 50%;
+      background: radial-gradient(circle at 32% 28%, #ffffff 0%, #dff0ff 18%, #7bbcff 45%, #2a78e0 70%, #0b3a8c 100%);
+      box-shadow:
+        0 0 18px rgba(74, 158, 255, 0.45),
+        0 8px 14px rgba(0, 0, 0, 0.5),
+        inset -4px -6px 10px rgba(2, 20, 70, 0.5);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+
+    .music-btn:hover  { transform: scale(1.08); }
+    .music-btn:active { transform: scale(0.95); }
+
+    .music-btn svg {
+      width: 26px;
+      height: 26px;
+    }
+
+    .music-btn .off-mark { display: none; }
+    .music-btn.muted .on-waves { display: none; }
+    .music-btn.muted .off-mark { display: inline; }
+
+    /* ---- main menu background: deep ocean with light rays, rising bubbles and a heartbeat line ---- */
+    #home {
+      background: linear-gradient(180deg, #0b3f73 0%, #072f5c 30%, #041a3a 70%, #020b1a 100%);
+    }
+
+    .ocean {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    /* glow from the water's surface */
+    .ocean::before {
+      content: "";
+      position: absolute;
+      top: -35vh;
+      left: 5%;
+      width: 90%;
+      height: 70vh;
+      background: radial-gradient(ellipse at center, rgba(123, 188, 255, 0.35) 0%, transparent 70%);
+      animation: surface-glow 7s ease-in-out infinite alternate;
+    }
+
+    @keyframes surface-glow {
+      from { opacity: 0.6; }
+      to   { opacity: 1; }
+    }
+
+    .ray {
+      position: absolute;
+      top: -10vh;
+      height: 95vh;
+      /* soft side edges come from the gradient and the fade-out from the mask, so no costly blur filter */
+      background: linear-gradient(90deg, transparent, rgba(190, 230, 255, 0.16) 50%, transparent);
+      -webkit-mask-image: linear-gradient(to bottom, #000, transparent 85%);
+      mask-image: linear-gradient(to bottom, #000, transparent 85%);
+      transform-origin: top center;
+      will-change: transform, opacity;
+      animation: ray-sway ease-in-out infinite alternate;
+    }
+
+    @keyframes ray-sway {
+      from { transform: rotate(var(--r)); opacity: 0.45; }
+      to   { transform: rotate(calc(var(--r) + 5deg)); opacity: 1; }
+    }
+
+    .rise {
+      position: absolute;
+      bottom: -30px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255, 255, 255, 0.45);
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.55), rgba(123, 188, 255, 0.08) 60%, transparent);
+      will-change: transform, opacity;
+      animation: rise linear infinite;
+    }
+
+    @keyframes rise {
+      0%   { transform: translate(0, 0);                     opacity: 0; }
+      10%  {                                                  opacity: 0.8; }
+      50%  { transform: translate(var(--drift), -55vh); }
+      90%  {                                                  opacity: 0.8; }
+      100% { transform: translate(0, -115vh);                 opacity: 0; }
+    }
+
+    .heartbeat {
+      position: absolute;
+      left: 0;
+      bottom: 10vh;
+      width: 100%;
+      height: 80px;
+      overflow: visible;
+    }
+
+    .heartbeat .trace {
+      fill: none;
+      stroke: rgba(123, 188, 255, 0.12);
+      stroke-width: 2;
+    }
+
+    /* a glowing blip that runs along the line */
+    .heartbeat .pulse {
+      fill: none;
+      stroke: #a6ddff;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 140 1000;
+      opacity: 0.55;
+      animation: heartbeat-run 3.4s linear infinite;
+    }
+
+    /* wide faint copy under the blip for its glow (cheaper than a drop-shadow filter) */
+    .heartbeat .pulse.glow {
+      stroke-width: 9;
+      opacity: 0.18;
+    }
+
+    @keyframes heartbeat-run {
+      from { stroke-dashoffset: 140; }
+      to   { stroke-dashoffset: -1000; }
+    }
+
     /* module 1 page: whale background, original file used as-is (no recompression) */
     .page.module-1 {
       background-color: #062a6b;
@@ -44,15 +193,69 @@
       background-repeat: no-repeat;
     }
 
-    /* 3D model standing in the module 2 hospital room; JS places it next to the bed */
-    .scene-model {
-      display: none;
-      position: absolute;
-      background: transparent;
-      --poster-color: transparent;
+    /* scenario 2 is in a different hospital room; scenario 1's people, speech and panels are hidden */
+    .page.module-2.scenario-2 {
+      background-image: url('images/893c4454fa5ea595bf2faa9f01a22020.jpg');
     }
 
-    .page.module-2 .scene-model {
+    .page.module-2.scenario-2 :is(.scene-patient, .scene-patient-sitting, .scene-patient-lying,
+      .scene-patient-down, .scene-nurse, .scene-nurse-giving, .scene-intro, .scenario, .speech, .nurse-choices) {
+      display: none;
+    }
+
+    /* patient and nurse cut-outs standing in the module 2 hospital room; JS places them by the bed */
+    .scene-patient,
+    .scene-nurse {
+      display: none;
+      position: absolute;
+      object-fit: contain;
+      object-position: bottom;
+      filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.35));
+      pointer-events: none;
+    }
+
+    /* once the nurse gets him sitting upright, the standing picture swaps for the sitting one;
+       after the rude choice he lies down on the bed instead */
+    .scene-patient-sitting,
+    .scene-patient-lying,
+    .scene-patient-down,
+    .scene-nurse-giving {
+      display: none;
+      position: absolute;
+      object-fit: contain;
+      object-position: bottom;
+      filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.35));
+      pointer-events: none;
+    }
+
+    /* after the wrong medication he's flat on the floor; the picture is taken from above,
+       so it's squashed to look like it's lying on the floor */
+    .scene-patient-down {
+      object-fit: fill;
+    }
+
+    .page.module-2.patient-sat .scene-patient,
+    .page.module-2.patient-lying .scene-patient,
+    .page.module-2.patient-down .scene-patient,
+    .page.module-2.nurse-giving .scene-nurse {
+      display: none;
+    }
+
+    .page.module-2.patient-sat .scene-patient-sitting,
+    .page.module-2.patient-lying .scene-patient-lying,
+    .page.module-2.patient-down .scene-patient-down,
+    .page.module-2.nurse-giving .scene-nurse-giving {
+      display: block;
+      animation: fade-in 0.5s ease-out both;
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .page.module-2 .scene-patient,
+    .page.module-2 .scene-nurse {
       display: block;
     }
 
@@ -141,6 +344,23 @@
       100% { transform: scale(1, 1); }
     }
 
+    /* hard-question fish: a soft static glow behind so they stand out against the video */
+    .floater.fish-floater .floater-squish {
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.1) 40%, transparent 65%);
+      border-radius: 50%;
+    }
+
+    .floater.fish-floater.flip .fish {
+      transform: scaleX(-1);
+    }
+
+    /* question shown on a big fish: the text sits on its body, which is right of centre */
+    .quiz-fish .quiz-question {
+      padding: 0 22% 0 24%;
+      color: #ffffff;
+      text-shadow: 0 0 3px rgba(0, 0, 0, 0.7), 0 2px 4px rgba(0, 0, 0, 0.6);
+    }
+
     /* question view: the popped bubble zooms up to the middle and the answers pop in below it */
     .quiz {
       position: absolute;
@@ -149,8 +369,10 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: 28px;
+      /* `safe` keeps the top reachable by scrolling if everything doesn't fit on a short screen */
+      justify-content: safe center;
+      overflow-y: auto;
+      gap: 22px;
       padding: 16px;
       box-sizing: border-box;
       background: rgba(2, 20, 60, 0.55);
@@ -195,6 +417,13 @@
       line-height: 1.2;
       color: #062a6b;
       animation: fade-up 0.5s ease-out 0.55s backwards;
+    }
+
+    /* long scenario questions get smaller text so they fit inside the bubble */
+    .quiz-question.long {
+      padding: 0 12%;
+      font-size: clamp(12px, 1.3vw, 17px);
+      line-height: 1.25;
     }
 
     @keyframes fade-up {
@@ -295,11 +524,320 @@
       animation: fade-up 0.4s ease-out backwards;
     }
 
+    .quiz-feedback > .quiz-explanation {
+      max-width: 700px;
+      font-size: clamp(15px, 1.6vw, 20px);
+      font-weight: 500;
+      line-height: 1.35;
+    }
+
     .continue {
       font-weight: 700;
       padding: 12px 32px;
       text-shadow: none;
     }
+
+    /* points tracker, top right of module 1; sits above the question view so it's always visible */
+    .score {
+      display: none;
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 7;
+      width: 240px;
+      padding: 14px 18px 16px;
+      border: 3px solid #ffffff;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(42, 120, 224, 0.85) 0%, rgba(11, 58, 140, 0.9) 100%);
+      box-shadow:
+        0 0 20px rgba(74, 158, 255, 0.45),
+        0 10px 18px rgba(0, 0, 0, 0.5),
+        inset 0 3px 6px rgba(255, 255, 255, 0.4);
+      font-family: 'Fredoka', sans-serif;
+      color: #ffffff;
+      text-align: center;
+      animation: pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+    }
+
+    .page.module-1 .score {
+      display: block;
+    }
+
+    .score-points {
+      font-size: 34px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .score-points.bump {
+      animation: score-bump 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes score-bump {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.35); color: #ffe76b; }
+      100% { transform: scale(1); }
+    }
+
+    .score-goal {
+      margin-top: 4px;
+      font-size: 15px;
+      font-weight: 500;
+      line-height: 1.3;
+    }
+
+    .score-bar {
+      height: 12px;
+      margin-top: 10px;
+      border: 2px solid #ffffff;
+      border-radius: 999px;
+      background: rgba(2, 20, 70, 0.6);
+      overflow: hidden;
+    }
+
+    .score-fill {
+      width: 0;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #a6ddff, #ffffff);
+      transition: width 0.6s cubic-bezier(0.34, 1.2, 0.64, 1);
+    }
+
+    .score.won .score-fill {
+      background: linear-gradient(90deg, #ffe76b, #fff7c2);
+    }
+
+    /* right answers in a row; glows gold from 3 up */
+    .score-streak {
+      margin-top: 8px;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .score-streak b {
+      font-weight: 700;
+    }
+
+    .score-streak.hot {
+      color: #ffe76b;
+      text-shadow: 0 0 8px rgba(255, 170, 40, 0.8);
+    }
+
+    .score-streak.bump {
+      animation: score-bump 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .score-streak.broken {
+      animation: streak-break 0.45s ease-out;
+    }
+
+    @keyframes streak-break {
+      0%, 100% { transform: translateX(0); }
+      20%      { transform: translateX(-6px); color: #ff8a8a; }
+      40%      { transform: translateX(6px); color: #ff8a8a; }
+      60%      { transform: translateX(-4px); }
+      80%      { transform: translateX(4px); }
+    }
+
+    .score-key {
+      margin-top: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      opacity: 0.85;
+    }
+
+    /* prize pop-up shown once when the goal is reached */
+    .prize {
+      position: absolute;
+      inset: 0;
+      z-index: 8;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      background: rgba(2, 20, 60, 0.6);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      animation: quiz-bg-in 0.4s ease-out both;
+    }
+
+    .fireworks {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* glossy blue card in the same style as the bubbles, with a gold star badge on top */
+    .prize-card {
+      position: relative;
+      width: min(460px, 100%);
+      box-sizing: border-box;
+      padding: 64px 32px 32px;
+      border: 4px solid #ffffff;
+      border-radius: 40px;
+      background:
+        radial-gradient(circle at 65% 110%, rgba(170, 215, 255, 0.5) 0%, transparent 45%),
+        radial-gradient(circle at 30% 0%, #7bbcff 0%, #2a78e0 45%, #0b3a8c 100%);
+      box-shadow:
+        0 0 0 6px rgba(255, 231, 107, 0.35),
+        0 0 60px rgba(255, 220, 90, 0.55),
+        0 24px 40px rgba(0, 0, 0, 0.55),
+        inset 0 -14px 30px rgba(2, 20, 70, 0.5),
+        inset 0 6px 14px rgba(255, 255, 255, 0.45);
+      font-family: 'Fredoka', sans-serif;
+      color: #ffffff;
+      text-align: center;
+      animation: prize-pop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    /* glossy shine across the top of the card */
+    .prize-card::before {
+      content: "";
+      position: absolute;
+      top: 12px;
+      left: 10%;
+      width: 80%;
+      height: 34%;
+      border-radius: 50%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.4), transparent);
+      pointer-events: none;
+    }
+
+    @keyframes prize-pop {
+      0%   { opacity: 0; transform: scale(0.4) rotate(-6deg); }
+      100% { opacity: 1; transform: scale(1) rotate(0); }
+    }
+
+    .prize-star {
+      position: absolute;
+      top: -58px;
+      left: 50%;
+      width: 116px;
+      height: 116px;
+      margin-left: -58px;
+      filter: drop-shadow(0 0 18px rgba(255, 220, 90, 0.8)) drop-shadow(0 6px 8px rgba(0, 0, 0, 0.4));
+      animation:
+        star-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both,
+        star-bob 2.4s ease-in-out 0.9s infinite;
+    }
+
+    @keyframes star-pop {
+      from { transform: scale(0) rotate(-90deg); }
+      to   { transform: scale(1) rotate(0); }
+    }
+
+    @keyframes star-bob {
+      0%, 100% { transform: translateY(0) rotate(-4deg); }
+      50%      { transform: translateY(-6px) rotate(4deg); }
+    }
+
+    .prize-card .prize-kicker,
+    .prize-card h2,
+    .prize-card p {
+      position: relative;
+      text-shadow:
+        0 0 3px #062a6b,
+        0 0 8px rgba(11, 58, 140, 0.9),
+        0 3px 4px rgba(0, 0, 0, 0.6);
+    }
+
+    .prize-kicker {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #fff2a8;
+    }
+
+    .prize-card h2 {
+      margin: 4px 0 6px;
+      font-size: clamp(34px, 5vw, 50px);
+      line-height: 1.05;
+    }
+
+    .prize-points {
+      position: relative;
+      margin-bottom: 14px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .prize-points span {
+      font-size: 56px;
+      line-height: 1;
+      background: linear-gradient(180deg, #fffbe0 0%, #ffe76b 50%, #f4b400 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 0 2px #7a4a00) drop-shadow(0 3px 3px rgba(0, 0, 0, 0.5));
+    }
+
+    .prize-card p {
+      margin: 0 0 24px;
+      font-size: clamp(17px, 2vw, 21px);
+      line-height: 1.35;
+    }
+
+    .prize-card p strong {
+      color: #fff2a8;
+    }
+
+    .prize-btn {
+      position: relative;
+      padding: 13px 34px;
+      border: 3px solid #ffffff;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #fff7c2 0%, #ffd93d 55%, #f4b400 100%);
+      box-shadow:
+        0 0 18px rgba(255, 220, 90, 0.7),
+        0 8px 14px rgba(0, 0, 0, 0.4),
+        inset 0 -4px 8px rgba(160, 90, 0, 0.3),
+        inset 0 3px 6px rgba(255, 255, 255, 0.7);
+      font-family: 'Fredoka', sans-serif;
+      font-size: 19px;
+      font-weight: 700;
+      color: #5a3500;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+
+    .prize-actions {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+    }
+
+    /* main menu button: glossy white-blue so the gold "Keep playing" stays the main choice */
+    .prize-btn.secondary {
+      background: linear-gradient(180deg, #ffffff 0%, #e6f6ff 55%, #bfe6ff 100%);
+      box-shadow:
+        0 0 14px rgba(140, 240, 255, 0.5),
+        0 8px 14px rgba(0, 0, 0, 0.4),
+        inset 0 -4px 8px rgba(60, 140, 210, 0.25),
+        inset 0 3px 6px rgba(255, 255, 255, 0.8);
+      color: #062a6b;
+    }
+
+    /* the scenario end card has three buttons, so they're a bit smaller to fit on one row */
+    .scene-end .prize-actions {
+      gap: 10px;
+    }
+
+    .scene-end .prize-btn {
+      padding: 12px 20px;
+      font-size: 17px;
+    }
+
+    .prize-btn:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    .prize-btn:hover:not(:disabled)  { transform: scale(1.06); }
+    .prize-btn:active { transform: scale(0.96); }
 
     /* temporary skip button for testing; only shown during the module 1 intro */
     .skip {
@@ -331,8 +869,9 @@
       display: block;
     }
 
-    .page.intro-done .skip,
-    .page.intro-done .intro {
+    /* extra .module-1 so this beats the `.page.module-1 .intro` rule further down */
+    .page.module-1.intro-done .skip,
+    .page.module-1.intro-done .intro {
       display: none;
     }
 
@@ -348,6 +887,312 @@
 
     .page.module-1 .intro {
       display: grid;
+    }
+
+    /* module 2's opening line, same caption style; it's shown when the page opens, which restarts it */
+    .scene-intro {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      place-items: center;
+      padding: 0 16px;
+      pointer-events: none;
+    }
+
+    .page.module-2 .scene-intro {
+      display: grid;
+    }
+
+    /* scenario card, pops in at the top once the opening line has faded */
+    .scenario {
+      display: none;
+      position: absolute;
+      top: 24px;
+      left: 50%;
+      z-index: 3; /* above the speech bubble when opened again */
+      width: min(620px, calc(100% - 200px));
+      box-sizing: border-box;
+      padding: 18px 28px 22px;
+      border: 3px solid #ffffff;
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at 65% 120%, rgba(170, 215, 255, 0.45) 0%, transparent 45%),
+        radial-gradient(circle at 30% 0%, #7bbcff 0%, #2a78e0 45%, #0b3a8c 100%);
+      box-shadow:
+        0 0 30px rgba(74, 158, 255, 0.5),
+        0 14px 26px rgba(0, 0, 0, 0.5),
+        inset 0 -10px 22px rgba(2, 20, 70, 0.45),
+        inset 0 4px 10px rgba(255, 255, 255, 0.45);
+      font-family: 'Fredoka', sans-serif;
+      color: #ffffff;
+      text-align: center;
+      cursor: pointer;
+      transition: width 0.45s ease, padding 0.45s ease;
+      animation: scenario-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 4.4s both;
+    }
+
+    .page.module-2 .scenario {
+      display: block;
+    }
+
+    /* minimized: shrinks to a small tab showing just "Scenario 1"; clicking opens it again */
+    .scenario.minimized {
+      width: 240px;
+      padding: 10px 20px 12px;
+    }
+
+    .scenario-kicker,
+    .scenario-title,
+    .scenario-text,
+    .scenario-toggle {
+      display: block;
+    }
+
+    .scenario-kicker {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #fff2a8;
+    }
+
+    /* the 1fr -> 0fr row lets the text slide shut smoothly whatever its height */
+    .scenario-body {
+      display: grid;
+      grid-template-rows: 1fr;
+      transition: grid-template-rows 0.45s ease, opacity 0.3s ease;
+    }
+
+    .scenario.minimized .scenario-body {
+      grid-template-rows: 0fr;
+      opacity: 0;
+    }
+
+    .scenario-inner {
+      overflow: hidden;
+    }
+
+    .scenario-title {
+      margin: 2px 0 8px;
+      font-size: clamp(24px, 3vw, 34px);
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .scenario-text {
+      font-size: clamp(16px, 1.7vw, 21px);
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    .scenario-toggle {
+      margin-top: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+
+    .scenario-toggle::after {
+      content: 'Tap to hide ▴';
+    }
+
+    .scenario.minimized .scenario-toggle {
+      margin-top: 2px;
+    }
+
+    .scenario.minimized .scenario-toggle::after {
+      content: 'Tap to read ▾';
+    }
+
+    /* patient's speech bubble, up and to the right of his head; JS sets left/top */
+    .speech {
+      display: none;
+      position: absolute;
+      z-index: 2;
+      width: 270px;
+      box-sizing: border-box;
+      padding: 14px 18px 16px;
+      border: 3px solid #0b3a8c;
+      border-radius: 24px;
+      background: #ffffff;
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.4);
+      font-family: 'Fredoka', sans-serif;
+      color: #062a6b;
+      transform-origin: 0 100%;
+    }
+
+    .page.module-2 .speech.show {
+      display: block;
+      animation: speech-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    /* tail pointing down-left at his head */
+    .speech::after {
+      content: '';
+      position: absolute;
+      left: 18px;
+      bottom: -17px;
+      width: 24px;
+      height: 24px;
+      border-right: 3px solid #0b3a8c;
+      border-bottom: 3px solid #0b3a8c;
+      background: #ffffff;
+      transform: skewX(30deg) rotate(45deg);
+      border-bottom-right-radius: 4px;
+    }
+
+    .speech-label {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #2a78e0;
+    }
+
+    .speech-text {
+      margin-top: 4px;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .nurse-speech {
+      border-color: #c2185b;
+    }
+
+    .nurse-speech::after {
+      border-color: #c2185b;
+    }
+
+    .nurse-speech .speech-label {
+      color: #c2185b;
+    }
+
+    /* the player picks what the nurse says, in a panel along the bottom */
+    .nurse-choices {
+      display: none;
+      position: absolute;
+      left: 50%;
+      bottom: 24px;
+      z-index: 3;
+      width: min(760px, calc(100% - 32px));
+      box-sizing: border-box;
+      padding: 16px 18px 18px;
+      border: 3px solid #ffffff;
+      border-radius: 28px;
+      background: rgba(6, 32, 90, 0.85);
+      box-shadow: 0 0 24px rgba(74, 158, 255, 0.45), 0 14px 26px rgba(0, 0, 0, 0.5);
+      font-family: 'Fredoka', sans-serif;
+      color: #ffffff;
+      text-align: center;
+    }
+
+    .page.module-2 .nurse-choices.show {
+      display: block;
+      animation: choices-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    .page.module-2 .nurse-choices.show.leaving {
+      animation: choices-out 0.4s ease-in forwards;
+    }
+
+    @keyframes choices-in {
+      from { opacity: 0; transform: translateX(-50%) translateY(40px); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    @keyframes choices-out {
+      from { opacity: 1; transform: translateX(-50%) translateY(0); }
+      to   { opacity: 0; transform: translateX(-50%) translateY(40px); }
+    }
+
+    /* what the nurse says to the player before a question, when the step has one */
+    .nurse-choices-intro {
+      margin-bottom: 12px;
+      padding: 10px 16px 12px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.12);
+      font-size: clamp(14px, 1.5vw, 18px);
+      font-weight: 500;
+      line-height: 1.4;
+      text-align: left;
+    }
+
+    .nurse-choices-intro[hidden] {
+      display: none;
+    }
+
+    .nurse-choices-who {
+      display: block;
+      margin-bottom: 2px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #ffb3d1;
+    }
+
+    .nurse-choices-title {
+      margin-bottom: 12px;
+      font-size: clamp(18px, 2vw, 24px);
+      font-weight: 700;
+    }
+
+    .nurse-choices .answer {
+      font-size: clamp(14px, 1.4vw, 17px);
+    }
+
+    .nurse-choices .answer.wrong {
+      animation: choice-shake 0.4s ease-out;
+    }
+
+    @keyframes choice-shake {
+      0%, 100% { transform: translateX(0); }
+      25%      { transform: translateX(-8px); }
+      50%      { transform: translateX(8px); }
+      75%      { transform: translateX(-4px); }
+    }
+
+    .nurse-feedback {
+      margin-top: 12px;
+      font-size: clamp(15px, 1.6vw, 19px);
+      font-weight: 500;
+      line-height: 1.35;
+    }
+
+    .nurse-feedback:empty {
+      display: none;
+    }
+
+    .nurse-feedback b {
+      color: #fff2a8;
+    }
+
+    .page.module-2 .speech.show.leaving {
+      animation: speech-out 0.35s ease-in forwards;
+    }
+
+    @keyframes speech-out {
+      from { opacity: 1; transform: translateY(-100%) scale(1); }
+      to   { opacity: 0; transform: translateY(-100%) scale(0.6); }
+    }
+
+    @keyframes speech-in {
+      from { opacity: 0; transform: translateY(-100%) scale(0.3); }
+      to   { opacity: 1; transform: translateY(-100%) scale(1); }
+    }
+
+    @keyframes scenario-in {
+      from { opacity: 0; transform: translateX(-50%) translateY(-30px) scale(0.8); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    }
+
+    @media (max-width: 600px) {
+      .scenario {
+        top: 130px;
+        width: calc(100% - 32px);
+      }
     }
 
     .caption {
@@ -553,7 +1398,8 @@
 
     .bubble {
       --size: min(26vw, 260px);
-      top: 50%;
+      /* slightly above centre so the labels clear the group credits in the bottom left */
+      top: 46%;
       left: 50%;
       width: var(--size);
       height: var(--size);
@@ -585,7 +1431,7 @@
         filter 0.25s ease-out;
     }
 
-    .bubble:not(.burst):not(.fade):hover {
+    .bubble:not(.burst):not(.fade):not(.hold):not(.explode):hover {
       scale: 1.04 0.9;
       /* the horizontal part cancels the sideways drift the 1.04 scale adds to the left/right bubbles */
       translate: calc(var(--x) * -0.04) 8px;
@@ -598,9 +1444,39 @@
         inset 4px 4px 10px rgba(255, 255, 255, 0.45);
     }
 
-    .bubble.left   { --x: -135%; animation-delay: 0s,    0.9s, 2s; }
-    .bubble.middle { --x: 0%;    animation-delay: 0.15s, 0.9s, 2.4s; }
-    .bubble.right  { --x: 135%;  animation-delay: 0.3s,  0.9s, 2.8s; }
+    /* the screen is split into three equal columns; each bubble sits in the middle of its column */
+    .bubble.left   { --x: -33.333vw; animation-delay: 0s,    0.9s, 2s; }
+    .bubble.middle { --x: 0vw;       animation-delay: 0.15s, 0.9s, 2.4s; }
+    .bubble.right  { --x: 33.333vw;  animation-delay: 0.3s,  0.9s, 2.8s; }
+
+    /* glowing lines between the three columns; they grow in once the bubbles have spread out */
+    .divider {
+      position: absolute;
+      top: 24vh;
+      bottom: 4vh;
+      width: 2px;
+      margin-left: -1px;
+      background: linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, 0.85) 15%, rgba(123, 188, 255, 0.85) 85%, transparent 100%);
+      box-shadow: 0 0 12px rgba(74, 158, 255, 0.6);
+      pointer-events: none;
+      animation: divider-in 0.8s ease-out 1.7s backwards;
+    }
+
+    .divider.one { left: 33.333%; }
+    .divider.two { left: 66.667%; }
+
+    @keyframes divider-in {
+      from { transform: scaleY(0); opacity: 0; }
+      to   { transform: scaleY(1); opacity: 1; }
+    }
+
+    .divider.implode {
+      animation: divider-out 0.45s ease-in forwards;
+    }
+
+    @keyframes divider-out {
+      to { transform: scaleY(0); opacity: 0; }
+    }
 
     /* big number inside each bubble, in the bubble's own white-to-blue shade */
     .bubble {
@@ -625,39 +1501,229 @@
       user-select: none;
     }
 
-    /* module 2 bubble shows a photo inside, with the bubble's shine and blue edge layered over it */
-    .bubble.middle {
-      background:
-        radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.3) 0%, transparent 40%),
-        radial-gradient(circle, transparent 55%, rgba(42, 120, 224, 0.55) 85%, rgba(6, 42, 107, 0.85) 100%),
-        url('images/module2-bubble.png') center 30% / cover no-repeat;
+    /* module 2 is a cartoon patient in a hospital gown, drawn in SVG */
+    .patient {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
     }
 
-    /* module 1 bubble is a 3D model; drop the drawn sphere so only the model shows.
+    /* angry patient: stomps, shakes his head, and waves both arms */
+    .patient-body,
+    .patient-head,
+    .patient-arm {
+      transform-box: view-box;
+    }
+
+    .patient-body {
+      animation: patient-stomp 0.45s ease-in-out infinite alternate;
+    }
+
+    .patient-head {
+      transform-origin: 100px 88px;
+      animation: head-shake 0.28s ease-in-out infinite alternate;
+    }
+
+    .patient-arm.left {
+      transform-origin: 66px 104px;
+      animation: wave-left 0.42s ease-in-out infinite alternate;
+    }
+
+    .patient-arm.right {
+      transform-origin: 134px 104px;
+      animation: wave-right 0.42s ease-in-out 0.21s infinite alternate;
+    }
+
+    @keyframes patient-stomp {
+      from { transform: translateY(0); }
+      to   { transform: translateY(-3px); }
+    }
+
+    @keyframes head-shake {
+      from { transform: rotate(-5deg); }
+      to   { transform: rotate(5deg); }
+    }
+
+    @keyframes wave-left {
+      from { transform: rotate(-22deg); }
+      to   { transform: rotate(14deg); }
+    }
+
+    @keyframes wave-right {
+      from { transform: rotate(22deg); }
+      to   { transform: rotate(-14deg); }
+    }
+
+    /* click: he turns around (squash to nothing, swap to his back, stretch back out) and wiggles */
+    .patient.turn-out { animation: turn-out 0.16s ease-in forwards; }
+    .patient.turn-in  { animation: turn-in 0.18s ease-out forwards; }
+
+    @keyframes turn-out { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+    @keyframes turn-in  { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+    .patient-back { display: none; }
+    .patient.facing-away .patient-body { display: none; }
+    .patient.facing-away .patient-back { display: inline; }
+
+    .patient-back-body {
+      transform-box: view-box;
+      animation: butt-shake 0.11s ease-in-out infinite alternate;
+    }
+
+    @keyframes butt-shake {
+      from { transform: translateX(-3px); }
+      to   { transform: translateX(3px); }
+    }
+
+    .bubble.patient-bubble.turned .number { display: none; }
+
+    /* the poop that flies at the screen */
+    .poop-shot {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 9;
+      width: 80px;
+      height: 80px;
+      margin: -40px 0 0 -40px;
+      pointer-events: none;
+    }
+
+    .blood.poo {
+      background: radial-gradient(circle at 35% 30%, #a8783f 0%, #6b4220 50%, #3d2410 100%);
+    }
+
+    .blood-flash.poo {
+      background: radial-gradient(circle, rgba(120, 75, 35, 0.75) 0%, rgba(90, 55, 25, 0.35) 45%, transparent 70%);
+    }
+
+    /* the "2" sits on his belly */
+    .bubble.patient-bubble .number {
+      position: relative;
+      z-index: 1;
+      margin-top: 34%;
+      font-size: calc(var(--size) * 0.2);
+    }
+
+    /* module 1 bubble uses a soap-bubble picture; drop the drawn sphere so only the picture shows.
        the bubble element still handles the animations, hover and click */
-    .bubble.has-model {
+    .bubble.has-art {
       background: none;
       box-shadow: none !important;
     }
 
-    .bubble.has-model::before,
-    .bubble.has-model::after {
-      display: none;
+    /* the fish and patient get a static glow behind them and a soft shadow underneath, instead of a
+       drop-shadow filter that would be recalculated on every frame of their animation */
+    .bubble.has-art::before {
+      top: 6%;
+      left: 6%;
+      width: 88%;
+      height: 88%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(74, 158, 255, 0.38) 0%, rgba(74, 158, 255, 0.12) 45%, transparent 70%);
+      transform: none;
+      filter: none;
     }
 
-    .bubble model-viewer {
+    .bubble.has-art::after {
+      top: auto;
+      right: auto;
+      bottom: 0;
+      left: 25%;
+      width: 50%;
+      height: 9%;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(0, 0, 0, 0.45) 0%, transparent 70%);
+      transform: none;
+      filter: none;
+    }
+
+    /* module 1 is a cartoon fish drawn in SVG */
+    .fish {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
-      background: transparent;
+      overflow: visible;
       pointer-events: none;
-      --poster-color: transparent;
+    }
+
+    /* tail swings from where it joins the body */
+    .fish-tail {
+      transform-box: view-box;
+      transform-origin: 66px 80px;
+      animation: tail-swish 1.4s ease-in-out infinite;
+    }
+
+    .fish.wiggle .fish-tail {
+      animation: tail-swish-fast 0.14s ease-in-out infinite;
+    }
+
+    @keyframes tail-swish {
+      0%, 100% { transform: rotate(-8deg); }
+      50%      { transform: rotate(8deg); }
+    }
+
+    @keyframes tail-swish-fast {
+      0%, 100% { transform: rotate(-26deg); }
+      50%      { transform: rotate(26deg); }
+    }
+
+    /* the "1" sits on the fish's body rather than the middle of the square */
+    .bubble.fish-bubble .number {
+      position: relative;
+      z-index: 1;
+      margin-left: 14%;
+      font-size: calc(var(--size) * 0.34);
+    }
+
+    /* while the tail wiggles before exploding, the fish holds still */
+    .bubble.hold {
+      animation: none;
+      transform: translateX(var(--x));
+    }
+
+    .bubble.explode {
+      animation: explode 0.25s ease-in forwards;
+    }
+
+    @keyframes explode {
+      0%   { transform: translateX(var(--x)) scale(1);    opacity: 1; }
+      40%  { transform: translateX(var(--x)) scale(1.18); opacity: 1; }
+      100% { transform: translateX(var(--x)) scale(0.2);  opacity: 0; }
+    }
+
+    /* red splatter when the fish explodes */
+    .blood {
+      position: absolute;
+      z-index: 6;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #ff6b6b 0%, #d10000 45%, #7a0000 100%);
+      pointer-events: none;
+    }
+
+    .blood-flash {
+      position: absolute;
+      z-index: 6;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 40, 40, 0.75) 0%, rgba(200, 0, 0, 0.35) 45%, transparent 70%);
+      pointer-events: none;
+      animation: blood-flash 0.5s ease-out forwards;
+    }
+
+    @keyframes blood-flash {
+      from { transform: translate(-50%, -50%) scale(0.3); opacity: 1; }
+      to   { transform: translate(-50%, -50%) scale(1.3); opacity: 0; }
     }
 
     /* module name under a bubble; same width and animations as the bubble so it travels with it */
     .label {
       --size: min(26vw, 260px);
       position: absolute;
-      top: calc(50% + var(--size) / 2 + 28px);
+      top: calc(46% + var(--size) / 2 + 28px);
       left: 50%;
       width: var(--size);
       margin-left: calc(var(--size) / -2);
@@ -681,9 +1747,9 @@
     }
 
     /* float delays match each bubble's so the label bobs in step with it */
-    .label.left   { --x: -135%; animation-delay: 1.9s, 2s; }
-    .label.middle { --x: 0%;    animation-delay: 1.9s, 2.4s; }
-    .label.right  { --x: 135%;  animation-delay: 1.9s, 2.8s; }
+    .label.left   { --x: -33.333vw; animation-delay: 1.9s, 2s; }
+    .label.middle { --x: 0vw;       animation-delay: 1.9s, 2.4s; }
+    .label.right  { --x: 33.333vw;  animation-delay: 1.9s, 2.8s; }
 
     @keyframes label-fade-in {
       from { opacity: 0; }
@@ -807,20 +1873,236 @@
 </head>
 <body>
   <div class="stage" id="home">
+    <div class="ocean" id="ocean" aria-hidden="true">
+      <div class="ray" style="left: 12%; width: 7%;  --r: 14deg;  animation-duration: 7s;"></div>
+      <div class="ray" style="left: 30%; width: 4%;  --r: 8deg;   animation-duration: 9s;"></div>
+      <div class="ray" style="left: 46%; width: 9%;  --r: 2deg;   animation-duration: 8s;"></div>
+      <div class="ray" style="left: 63%; width: 5%;  --r: -6deg;  animation-duration: 10s;"></div>
+      <div class="ray" style="left: 78%; width: 8%;  --r: -12deg; animation-duration: 7.5s;"></div>
+      <svg class="heartbeat" viewBox="0 0 1000 80" preserveAspectRatio="none">
+        <path class="trace" vector-effect="non-scaling-stroke"
+          d="M0 40 H170 l12 -7 l12 7 h22 l8 10 l12 -46 l12 56 l8 -20 h24 l14 -9 l14 9 H600 l12 -7 l12 7 h22 l8 10 l12 -46 l12 56 l8 -20 h24 l14 -9 l14 9 H1000" />
+        <path class="pulse glow" vector-effect="non-scaling-stroke" pathLength="1000"
+          d="M0 40 H170 l12 -7 l12 7 h22 l8 10 l12 -46 l12 56 l8 -20 h24 l14 -9 l14 9 H600 l12 -7 l12 7 h22 l8 10 l12 -46 l12 56 l8 -20 h24 l14 -9 l14 9 H1000" />
+        <path class="pulse" vector-effect="non-scaling-stroke" pathLength="1000"
+          d="M0 40 H170 l12 -7 l12 7 h22 l8 10 l12 -46 l12 56 l8 -20 h24 l14 -9 l14 9 H600 l12 -7 l12 7 h22 l8 10 l12 -46 l12 56 l8 -20 h24 l14 -9 l14 9 H1000" />
+      </svg>
+    </div>
     <div class="welcome">
-      <h1>Welcome Nursing-101 Class</h1>
+      <h1>Welcome NURS-102 Class</h1>
       <p>please choose the first module you would like to begin with.</p>
     </div>
-    <div class="sphere bubble left has-model" data-module="1">
-      <model-viewer src="images/bubble.glb" auto-rotate rotation-per-second="20deg"
-        interaction-prompt="none" disable-zoom environment-image="neutral" exposure="1.1"
-        loading="eager" alt="3D bubble for module 1"></model-viewer>
+    <div class="sphere bubble left has-art fish-bubble" data-module="1">
+      <svg class="fish" id="fish" viewBox="0 0 220 160" aria-hidden="true">
+        <defs>
+          <linearGradient id="fish-body" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#7bbcff" />
+            <stop offset="0.55" stop-color="#2a78e0" />
+            <stop offset="1" stop-color="#0b3a8c" />
+          </linearGradient>
+          <linearGradient id="fish-fin" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#bfe6ff" />
+            <stop offset="1" stop-color="#2a78e0" />
+          </linearGradient>
+          <radialGradient id="fish-belly" cx="0.5" cy="0.3" r="0.7">
+            <stop offset="0" stop-color="#ffffff" />
+            <stop offset="1" stop-color="#cfe8ff" />
+          </radialGradient>
+        </defs>
+
+        <g class="fish-tail">
+          <path d="M70 80 C50 60 30 38 10 30 C22 55 22 105 10 130 C30 122 50 100 70 80 Z"
+            fill="url(#fish-fin)" stroke="#062a6b" stroke-width="3" stroke-linejoin="round" />
+          <path d="M22 50 C34 66 34 94 22 110" fill="none" stroke="#062a6b" stroke-width="2" opacity="0.35" />
+        </g>
+
+        <!-- top and bottom fins -->
+        <path d="M100 40 C112 12 150 8 170 30 C150 30 130 34 118 44 Z"
+          fill="url(#fish-fin)" stroke="#062a6b" stroke-width="3" stroke-linejoin="round" />
+        <path d="M118 122 C124 140 142 146 156 140 C146 132 140 124 138 118 Z"
+          fill="url(#fish-fin)" stroke="#062a6b" stroke-width="3" stroke-linejoin="round" />
+
+        <!-- body -->
+        <ellipse cx="128" cy="80" rx="74" ry="50" fill="url(#fish-body)" stroke="#062a6b" stroke-width="3" />
+        <path d="M70 92 C100 128 168 132 196 98 C170 112 104 112 70 92 Z" fill="url(#fish-belly)" opacity="0.9" />
+
+        <!-- gill and scales -->
+        <path d="M162 46 C150 62 150 100 162 116" fill="none" stroke="#062a6b" stroke-width="3" stroke-linecap="round" opacity="0.6" />
+        <path d="M100 62 q8 8 0 16 M116 56 q8 8 0 16 M116 82 q8 8 0 16 M132 64 q8 8 0 16" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.35" />
+
+        <!-- side fin -->
+        <path d="M128 88 C120 102 124 112 138 112 C140 104 138 96 128 88 Z"
+          fill="url(#fish-fin)" stroke="#062a6b" stroke-width="2.5" stroke-linejoin="round" />
+
+        <!-- eye -->
+        <circle cx="176" cy="68" r="13" fill="#ffffff" stroke="#062a6b" stroke-width="2.5" />
+        <circle cx="179" cy="69" r="7" fill="#062a6b" />
+        <circle cx="182" cy="65" r="2.5" fill="#ffffff" />
+
+        <!-- mouth -->
+        <path d="M194 92 q6 4 0 8" fill="none" stroke="#062a6b" stroke-width="3" stroke-linecap="round" />
+
+        <!-- glossy highlight -->
+        <ellipse cx="118" cy="50" rx="34" ry="9" fill="#ffffff" opacity="0.45" transform="rotate(-8 118 50)" />
+      </svg>
+      <span class="number">1</span>
     </div>
-    <div class="sphere bubble middle" data-module="2"><span class="number">2</span></div>
+    <div class="sphere bubble middle has-art patient-bubble" data-module="2">
+      <svg class="patient" id="patient" viewBox="0 0 200 200" aria-hidden="true">
+        <defs>
+          <pattern id="gown-dots" width="10" height="10" patternUnits="userSpaceOnUse">
+            <rect width="10" height="10" fill="#dff0ff" />
+            <circle cx="3" cy="3" r="1.3" fill="#2a78e0" opacity="0.55" />
+            <circle cx="8" cy="8" r="1.3" fill="#2a78e0" opacity="0.55" />
+          </pattern>
+          <radialGradient id="angry-face" cx="0.5" cy="0.35" r="0.65">
+            <stop offset="0" stop-color="#f07a5e" />
+            <stop offset="1" stop-color="#e0a985" />
+          </radialGradient>
+          <linearGradient id="gown-shade" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#0b3a8c" stop-opacity="0.18" />
+            <stop offset="0.45" stop-color="#ffffff" stop-opacity="0" />
+            <stop offset="1" stop-color="#0b3a8c" stop-opacity="0.22" />
+          </linearGradient>
+        </defs>
+
+        <g class="patient-body">
+          <!-- legs and socks -->
+          <rect x="80" y="160" width="14" height="26" rx="6" fill="#e0a985" stroke="#062a6b" stroke-width="2.5" />
+          <rect x="106" y="160" width="14" height="26" rx="6" fill="#e0a985" stroke="#062a6b" stroke-width="2.5" />
+          <ellipse cx="85" cy="189" rx="13" ry="6" fill="#7bbcff" stroke="#062a6b" stroke-width="2.5" />
+          <ellipse cx="115" cy="189" rx="13" ry="6" fill="#7bbcff" stroke="#062a6b" stroke-width="2.5" />
+
+          <!-- arms raised and waving, with fists (drawn behind the body) -->
+          <g class="patient-arm left">
+            <path d="M66 104 C52 92 42 76 36 58" fill="none" stroke="#062a6b" stroke-width="15" stroke-linecap="round" />
+            <path d="M66 104 C52 92 42 76 36 58" fill="none" stroke="#e0a985" stroke-width="10" stroke-linecap="round" />
+            <circle cx="35" cy="50" r="10" fill="#e0a985" stroke="#062a6b" stroke-width="2.5" />
+            <path d="M30 46 h10 M30 51 h10" stroke="#062a6b" stroke-width="1.5" stroke-linecap="round" opacity="0.5" />
+            <path d="M56 94 L72 90 L76 112 L60 114 Z" fill="url(#gown-dots)" stroke="#062a6b" stroke-width="2.5" stroke-linejoin="round" />
+          </g>
+          <g class="patient-arm right">
+            <path d="M134 104 C148 92 158 76 164 58" fill="none" stroke="#062a6b" stroke-width="15" stroke-linecap="round" />
+            <path d="M134 104 C148 92 158 76 164 58" fill="none" stroke="#e0a985" stroke-width="10" stroke-linecap="round" />
+            <circle cx="165" cy="50" r="10" fill="#e0a985" stroke="#062a6b" stroke-width="2.5" />
+            <path d="M160 46 h10 M160 51 h10" stroke="#062a6b" stroke-width="1.5" stroke-linecap="round" opacity="0.5" />
+            <!-- hospital wristband -->
+            <rect x="154" y="64" width="15" height="5" rx="2" fill="#ffffff" stroke="#062a6b" stroke-width="1.5" transform="rotate(25 161 66)" />
+            <path d="M144 94 L128 90 L124 112 L140 114 Z" fill="url(#gown-dots)" stroke="#062a6b" stroke-width="2.5" stroke-linejoin="round" />
+          </g>
+
+          <!-- big round belly in the gown -->
+          <path d="M70 90 C46 98 38 132 46 160 Q100 178 154 160 C162 132 154 98 130 90 Q100 84 70 90 Z"
+            fill="url(#gown-dots)" stroke="#062a6b" stroke-width="3" stroke-linejoin="round" />
+          <path d="M70 90 C46 98 38 132 46 160 Q100 178 154 160 C162 132 154 98 130 90 Q100 84 70 90 Z"
+            fill="url(#gown-shade)" />
+          <path d="M84 90 Q100 102 116 90" fill="none" stroke="#062a6b" stroke-width="3" stroke-linecap="round" />
+
+          <!-- head shaking -->
+          <g class="patient-head">
+            <circle cx="70" cy="60" r="6" fill="#e0a985" stroke="#062a6b" stroke-width="2.5" />
+            <circle cx="130" cy="60" r="6" fill="#e0a985" stroke="#062a6b" stroke-width="2.5" />
+            <circle cx="100" cy="58" r="31" fill="url(#angry-face)" stroke="#062a6b" stroke-width="3" />
+            <!-- double chin -->
+            <path d="M84 85 Q100 95 116 85" fill="none" stroke="#062a6b" stroke-width="2.5" stroke-linecap="round" />
+
+            <!-- bald with grey tufts on the sides -->
+            <path d="M71 52 C63 42 70 32 78 37 C74 42 74 48 76 55 Z" fill="#e6e6e6" stroke="#062a6b" stroke-width="2" stroke-linejoin="round" />
+            <path d="M129 52 C137 42 130 32 122 37 C126 42 126 48 124 55 Z" fill="#e6e6e6" stroke="#062a6b" stroke-width="2" stroke-linejoin="round" />
+            <ellipse cx="94" cy="36" rx="9" ry="4" fill="#ffffff" opacity="0.35" transform="rotate(-15 94 36)" />
+
+            <!-- forehead wrinkles -->
+            <path d="M90 41 q10 -3 20 0" fill="none" stroke="#062a6b" stroke-width="1.8" stroke-linecap="round" opacity="0.45" />
+
+            <!-- anger mark -->
+            <path d="M118 27 q5 4 0 8 M132 27 q-5 4 0 8 M121 24 q4 5 8 0 M121 38 q4 -5 8 0"
+              fill="none" stroke="#e02020" stroke-width="3" stroke-linecap="round" />
+
+            <!-- angry eyebrows and eyes -->
+            <path d="M80 45 L97 53 M120 45 L103 53" stroke="#062a6b" stroke-width="8" stroke-linecap="round" />
+            <path d="M80 45 L97 53 M120 45 L103 53" stroke="#d9d9d9" stroke-width="5" stroke-linecap="round" />
+            <circle cx="90" cy="58" r="3.6" fill="#062a6b" />
+            <circle cx="110" cy="58" r="3.6" fill="#062a6b" />
+
+            <!-- red cheeks and big nose -->
+            <circle cx="80" cy="70" r="6" fill="#ff4a4a" opacity="0.45" />
+            <circle cx="120" cy="70" r="6" fill="#ff4a4a" opacity="0.45" />
+            <ellipse cx="100" cy="67" rx="6.5" ry="5.5" fill="#e88f78" stroke="#062a6b" stroke-width="2" />
+
+            <!-- swearing: censor bar over the mouth -->
+            <rect x="79" y="76" width="42" height="15" rx="4" fill="#161616" stroke="#ffffff" stroke-width="1.5" />
+            <text x="100" y="87.5" text-anchor="middle" font-family="Fredoka, sans-serif" font-size="11.5" font-weight="700" fill="#ff5a5a">#@$%&amp;!</text>
+
+            <!-- grey moustache -->
+            <path d="M86 75 Q93 69 100 73 Q107 69 114 75 Q107 79 100 76 Q93 79 86 75 Z" fill="#e6e6e6" stroke="#062a6b" stroke-width="2" stroke-linejoin="round" />
+          </g>
+        </g>
+
+        <!-- back view, shown after he turns around; the gown is open at the back -->
+        <g class="patient-back">
+          <g class="patient-back-body">
+            <rect x="80" y="160" width="14" height="26" rx="6" fill="#e0a985" stroke="#062a6b" stroke-width="2.5" />
+            <rect x="106" y="160" width="14" height="26" rx="6" fill="#e0a985" stroke="#062a6b" stroke-width="2.5" />
+            <ellipse cx="85" cy="189" rx="13" ry="6" fill="#7bbcff" stroke="#062a6b" stroke-width="2.5" />
+            <ellipse cx="115" cy="189" rx="13" ry="6" fill="#7bbcff" stroke="#062a6b" stroke-width="2.5" />
+
+            <g class="patient-arm left">
+              <path d="M66 104 C52 92 42 76 36 58" fill="none" stroke="#062a6b" stroke-width="15" stroke-linecap="round" />
+              <path d="M66 104 C52 92 42 76 36 58" fill="none" stroke="#e0a985" stroke-width="10" stroke-linecap="round" />
+              <circle cx="35" cy="50" r="10" fill="#e0a985" stroke="#062a6b" stroke-width="2.5" />
+              <path d="M56 94 L72 90 L76 112 L60 114 Z" fill="url(#gown-dots)" stroke="#062a6b" stroke-width="2.5" stroke-linejoin="round" />
+            </g>
+            <g class="patient-arm right">
+              <path d="M134 104 C148 92 158 76 164 58" fill="none" stroke="#062a6b" stroke-width="15" stroke-linecap="round" />
+              <path d="M134 104 C148 92 158 76 164 58" fill="none" stroke="#e0a985" stroke-width="10" stroke-linecap="round" />
+              <circle cx="165" cy="50" r="10" fill="#e0a985" stroke="#062a6b" stroke-width="2.5" />
+              <path d="M144 94 L128 90 L124 112 L140 114 Z" fill="url(#gown-dots)" stroke="#062a6b" stroke-width="2.5" stroke-linejoin="round" />
+            </g>
+
+            <path d="M70 90 C46 98 38 132 46 160 Q100 178 154 160 C162 132 154 98 130 90 Q100 84 70 90 Z"
+              fill="url(#gown-dots)" stroke="#062a6b" stroke-width="3" stroke-linejoin="round" />
+            <path d="M70 90 C46 98 38 132 46 160 Q100 178 154 160 C162 132 154 98 130 90 Q100 84 70 90 Z"
+              fill="url(#gown-shade)" />
+
+            <!-- open back and bum -->
+            <path d="M96 92 Q100 90 104 92 L116 168 Q100 174 84 168 Z" fill="#e0a985" stroke="#062a6b" stroke-width="2.5" stroke-linejoin="round" />
+            <circle cx="91" cy="156" r="14" fill="#e8b392" stroke="#062a6b" stroke-width="2.5" />
+            <circle cx="109" cy="156" r="14" fill="#e8b392" stroke="#062a6b" stroke-width="2.5" />
+            <path d="M100 146 L100 168" stroke="#062a6b" stroke-width="2.5" stroke-linecap="round" />
+            <!-- gown ties across the gap -->
+            <path d="M93 104 h14 M94 126 h12" stroke="#2a78e0" stroke-width="3" stroke-linecap="round" />
+
+            <!-- back of the head -->
+            <circle cx="70" cy="60" r="6" fill="#e0a985" stroke="#062a6b" stroke-width="2.5" />
+            <circle cx="130" cy="60" r="6" fill="#e0a985" stroke="#062a6b" stroke-width="2.5" />
+            <circle cx="100" cy="58" r="31" fill="url(#angry-face)" stroke="#062a6b" stroke-width="3" />
+            <path d="M71 52 C63 42 70 32 78 37 C74 42 74 48 76 55 Z" fill="#e6e6e6" stroke="#062a6b" stroke-width="2" stroke-linejoin="round" />
+            <path d="M129 52 C137 42 130 32 122 37 C126 42 126 48 124 55 Z" fill="#e6e6e6" stroke="#062a6b" stroke-width="2" stroke-linejoin="round" />
+            <ellipse cx="100" cy="40" rx="10" ry="4.5" fill="#ffffff" opacity="0.3" />
+            <path d="M118 27 q5 4 0 8 M132 27 q-5 4 0 8 M121 24 q4 5 8 0 M121 38 q4 -5 8 0"
+              fill="none" stroke="#e02020" stroke-width="3" stroke-linecap="round" />
+          </g>
+        </g>
+      </svg>
+      <span class="number">2</span>
+    </div>
     <div class="sphere bubble right" data-module="3"><span class="number">3</span></div>
+    <div class="divider one"></div>
+    <div class="divider two"></div>
     <div class="label left">Understanding Culture &amp; Diversity</div>
     <div class="label middle">Communication &amp; Relational Practice</div>
     <div class="label right">Cultural Safety in Nursing</div>
+
+    <button class="music-btn" id="music-btn" aria-label="Turn music on or off">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#062a6b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 9h4l5-4v14l-5-4H4z" fill="#062a6b" />
+        <g class="on-waves">
+          <path d="M16 9a4 4 0 0 1 0 6" />
+          <path d="M18.5 6.5a7.5 7.5 0 0 1 0 11" />
+        </g>
+        <path class="off-mark" d="M16 9l5 6M21 9l-5 6" />
+      </svg>
+    </button>
 
     <div class="credits">
       <div class="credits-inner">
@@ -838,11 +2120,14 @@
   </div>
 
   <div class="page hidden" id="page">
-    <video class="bg-video" id="bg-video" src="images/155553-810322535_medium.mp4" muted loop playsinline preload="auto"></video>
+    <video class="bg-video" id="bg-video" src="images/155553-810322535_medium.mp4" muted loop playsinline preload="metadata"></video>
     <div class="float-layer" id="float-layer"></div>
-    <model-viewer class="scene-model" id="scene-model" src="images/ComfyUI_00002%20(1).glb"
-      camera-controls disable-zoom interaction-prompt="none" environment-image="neutral"
-      shadow-intensity="1" loading="lazy" alt="3D model beside the hospital bed"></model-viewer>
+    <img class="scene-patient" id="scene-patient" src="images/patient.png" alt="Patient in a hospital gown beside the bed">
+    <img class="scene-patient-sitting" id="scene-patient-sitting" src="images/patient-sitting.png" alt="Patient sitting upright in a chair">
+    <img class="scene-patient-lying" id="scene-patient-lying" src="images/patient-lying.png" alt="Patient lying on the bed">
+    <img class="scene-patient-down" id="scene-patient-down" src="images/patient-down.png" alt="Patient collapsed on the floor">
+    <img class="scene-nurse" id="scene-nurse" src="images/nurse.png" alt="Nurse standing by the bed">
+    <img class="scene-nurse-giving" id="scene-nurse-giving" src="images/nurse-giving.png" alt="Nurse handing the patient a pill bottle">
     <button class="sphere back" id="back" aria-label="Go back">
       <svg viewBox="0 0 24 24" fill="none" stroke="#062a6b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
         <path d="M19 12H5M12 19l-7-7 7-7" />
@@ -851,14 +2136,54 @@
     <div class="back-label">Return</div>
 
     <div class="intro">
-      <div class="caption first">Pop a bubble and answer the question!</div>
-      <div class="caption second">The bigger the bubble, the harder the question.</div>
+      <div class="caption first">Pop the bubbles for easy questions, and catch the fish for harder ones!</div>
+      <div class="caption second">Bubbles are worth 1 point and fish are worth 2. Keep your streak going!</div>
       <div class="caption count three">3</div>
       <div class="caption count two">2</div>
       <div class="caption count one">1</div>
     </div>
 
+    <div class="scene-intro">
+      <div class="caption first">Help the nurse decide what she should do next!</div>
+    </div>
+
+    <button class="scenario" id="scenario" aria-expanded="true">
+      <span class="scenario-kicker">Scenario 1</span>
+      <span class="scenario-body">
+        <span class="scenario-inner">
+          <span class="scenario-title">Patient situation</span>
+          <span class="scenario-text">A 60-year-old patient is standing beside their hospital bed. They are breathing heavily, coughing, and appear uncomfortable.</span>
+        </span>
+      </span>
+      <span class="scenario-toggle"></span>
+    </button>
+
+    <div class="speech" id="speech">
+      <div class="speech-label">Patient</div>
+      <div class="speech-text">Nurse, I can't catch my breath! I'm feeling really short of breath!</div>
+    </div>
+
+    <div class="speech nurse-speech" id="nurse-speech">
+      <div class="speech-label">Nurse</div>
+      <div class="speech-text"></div>
+    </div>
+
+    <div class="nurse-choices" id="nurse-choices">
+      <div class="nurse-choices-intro"><span class="nurse-choices-who">Nurse</span><span class="nurse-choices-line"></span></div>
+      <div class="nurse-choices-title"></div>
+      <div class="quiz-answers"></div>
+      <div class="nurse-feedback"></div>
+    </div>
+
     <button class="skip" id="skip">Skip ▸</button>
+
+    <div class="score" id="score">
+      <div class="score-points" id="score-points">0 pts</div>
+      <div class="score-goal" id="score-goal"></div>
+      <div class="score-bar"><div class="score-fill" id="score-fill"></div></div>
+      <div class="score-streak" id="score-streak"></div>
+      <div class="score-key">Bubble 1 · Fish 2</div>
+    </div>
   </div>
 
   <script>
@@ -870,6 +2195,22 @@
     const bgVideo = document.getElementById('bg-video');
     const bubbles = document.querySelectorAll('.bubble');
     const labels = document.querySelectorAll('.label');
+    const dividers = document.querySelectorAll('.divider');
+
+    // small bubbles rising through the menu background, each with its own size, speed and drift
+    const ocean = document.getElementById('ocean');
+    for (let i = 0; i < 22; i++) {
+      const b = document.createElement('div');
+      const size = 4 + Math.random() * 12;
+      const duration = 10 + Math.random() * 12;
+      b.className = 'rise';
+      b.style.left = Math.random() * 100 + '%';
+      b.style.width = b.style.height = size + 'px';
+      b.style.setProperty('--drift', (Math.random() * 60 - 30) + 'px');
+      b.style.animationDuration = duration + 's';
+      b.style.animationDelay = -Math.random() * duration + 's'; // start mid-way so the screen isn't empty at first
+      ocean.appendChild(b);
+    }
     let busy = false;
 
     // ---- module 1 question bubbles ----
@@ -879,6 +2220,7 @@
       small:  { size: 60,  speed: 210 },
       medium: { size: 110, speed: 150 },
       big:    { size: 175, speed: 100 },
+      fish:   { size: 150, speed: 140 },
     };
     let floaters = [];
     let floatStartTimer = null;
@@ -887,64 +2229,208 @@
     let floatSession = 0; // bumped on stop so leftover spawn timers do nothing
     let quizOpen = false;
 
-    // questions per bubble size; each one goes on a random bubble of that size.
+    // ---- points ----
+    // 10 bubbles x 1 + 5 fish x 2 = 20 points available in total
+    const POINTS = { small: 1, medium: 1, big: 3, fish: 2 };
+    const PRIZE_POINTS = 12;
+    const PRIZE_PERSON = '______'; // who to see for the prize
+    const scoreEl = document.getElementById('score');
+    const scorePoints = document.getElementById('score-points');
+    const scoreGoal = document.getElementById('score-goal');
+    const scoreFill = document.getElementById('score-fill');
+    const scoreStreak = document.getElementById('score-streak');
+    let score = 0;
+    let streak = 0; // right answers in a row
+    let bestStreak = 0;
+    let prizePending = false; // show the prize pop-up once the current question closes
+
+    function renderScore() {
+      scorePoints.textContent = score + (score === 1 ? ' pt' : ' pts');
+      scoreStreak.innerHTML = `${streak >= 3 ? '🔥 ' : ''}Streak <b>${streak}</b> · Best <b>${bestStreak}</b>`;
+      scoreStreak.classList.toggle('hot', streak >= 3);
+      scoreFill.style.width = Math.min(100, score / PRIZE_POINTS * 100) + '%';
+      const won = score >= PRIZE_POINTS;
+      scoreEl.classList.toggle('won', won);
+      scoreGoal.textContent = won
+        ? `Prize unlocked! See ${PRIZE_PERSON} for your prize!`
+        : `Reach ${PRIZE_POINTS} points to win a prize!`;
+    }
+
+    function resetScore() {
+      score = 0;
+      streak = 0;
+      bestStreak = 0;
+      prizePending = false;
+      renderScore();
+    }
+
+    // a right answer adds to the streak, a wrong one breaks it
+    function updateStreak(correct) {
+      streak = correct ? streak + 1 : 0;
+      bestStreak = Math.max(bestStreak, streak);
+      renderScore();
+      scoreStreak.classList.remove('bump', 'broken');
+      void scoreStreak.offsetWidth;
+      scoreStreak.classList.add(correct ? 'bump' : 'broken');
+    }
+
+    function addPoints(n) {
+      const before = score;
+      score += n;
+      renderScore();
+      scorePoints.classList.remove('bump');
+      void scorePoints.offsetWidth;
+      scorePoints.classList.add('bump');
+      if (before < PRIZE_POINTS && score >= PRIZE_POINTS) prizePending = true;
+    }
+
+    function showPrize() {
+      const prize = document.createElement('div');
+      prize.className = 'prize';
+      prize.innerHTML = `
+        <canvas class="fireworks"></canvas>
+        <div class="prize-card">
+          <svg class="prize-star" viewBox="0 0 100 100" aria-hidden="true">
+            <defs>
+              <linearGradient id="star-gold" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#fffbe0" />
+                <stop offset="0.5" stop-color="#ffd93d" />
+                <stop offset="1" stop-color="#f4a100" />
+              </linearGradient>
+            </defs>
+            <path d="M50 6 L62 36 L94 38 L69 58 L78 90 L50 72 L22 90 L31 58 L6 38 L38 36 Z"
+              fill="url(#star-gold)" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" />
+            <ellipse cx="42" cy="32" rx="9" ry="5" fill="#ffffff" opacity="0.6" transform="rotate(-25 42 32)" />
+          </svg>
+          <div class="prize-kicker">Prize unlocked</div>
+          <h2>You did it!</h2>
+          <div class="prize-points"><span></span> points</div>
+          <p>Go see <strong></strong> to claim your prize.</p>
+          <div class="prize-actions">
+            <button class="prize-btn">Keep playing</button>
+            <button class="prize-btn secondary">Main menu</button>
+          </div>
+        </div>`;
+      prize.querySelector('.prize-points span').textContent = PRIZE_POINTS;
+      prize.querySelector('p strong').textContent = PRIZE_PERSON;
+
+      quizOpen = true; // keeps the bubbles paused while the pop-up is up
+      page.appendChild(prize);
+
+      // win jingle; the module music dips under it for a few seconds, then comes back
+      playSound(winSound);
+      if (!moduleMusic.paused) {
+        fadeMusic(moduleMusic, 0.08, 300);
+        setTimeout(() => {
+          if (!moduleMusic.paused) fadeMusic(moduleMusic, MUSIC_VOLUME, 1200);
+        }, 3600);
+      }
+
+      // started after it's on the page so the canvas has a size
+      const stopFireworks = launchFireworks(prize.querySelector('.fireworks'));
+      prize.querySelector('.prize-btn').addEventListener('click', () => {
+        stopFireworks();
+        prize.remove();
+        quizOpen = false;
+      });
+      prize.querySelector('.prize-btn.secondary').addEventListener('click', () => {
+        stopFireworks();
+        back.click(); // same as the Return button: clears the module and goes back to the menu
+      });
+    }
+
+    // a handful of small firework bursts behind the prize card for a few seconds
+    function launchFireworks(canvas) {
+      const ctx = canvas.getContext('2d');
+      const colors = ['#ffffff', '#a6ddff', '#ffe76b', '#ffb3d9', '#7bbcff'];
+      const sparks = [];
+      const start = performance.now();
+      let nextBurst = start + 200;
+      let frame;
+
+      function resize() {
+        canvas.width = canvas.clientWidth * devicePixelRatio;
+        canvas.height = canvas.clientHeight * devicePixelRatio;
+        ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+      }
+
+      function burst() {
+        const W = canvas.clientWidth;
+        const H = canvas.clientHeight;
+        // keep bursts toward the sides and top so they frame the card instead of hiding behind it
+        const side = Math.random() < 0.5 ? rand(0.08, 0.3) : rand(0.7, 0.92);
+        const x = W * (Math.random() < 0.25 ? rand(0.35, 0.65) : side);
+        const y = H * rand(0.12, 0.45);
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const count = 34;
+        for (let i = 0; i < count; i++) {
+          const angle = (i / count) * Math.PI * 2 + rand(-0.08, 0.08);
+          const speed = rand(110, 210);
+          sparks.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life: 1, color, size: rand(1.8, 3.2) });
+        }
+      }
+
+      let last = start;
+      function step(now) {
+        const dt = Math.min((now - last) / 1000, 0.05);
+        last = now;
+        if (now < start + 4500 && now >= nextBurst) {
+          burst();
+          nextBurst = now + rand(380, 700);
+        }
+
+        ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+        for (let i = sparks.length - 1; i >= 0; i--) {
+          const s = sparks[i];
+          s.vx *= 0.97;
+          s.vy = s.vy * 0.97 + 140 * dt; // drag plus a little gravity
+          s.x += s.vx * dt;
+          s.y += s.vy * dt;
+          s.life -= dt * 0.75;
+          if (s.life <= 0) { sparks.splice(i, 1); continue; }
+          ctx.globalAlpha = s.life;
+          ctx.fillStyle = s.color;
+          ctx.shadowColor = s.color;
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+
+        if (now < start + 4500 || sparks.length) frame = requestAnimationFrame(step);
+      }
+
+      resize();
+      frame = requestAnimationFrame(step);
+      return () => cancelAnimationFrame(frame);
+    }
+
+    renderScore();
+
+    // one question per bubble, handed out in random order.
     // `answer` is the index of the correct choice (0 = A).
-    const QUESTIONS = {
-      small: [
-        {
-          question: 'What is cultural sensitivity in nursing?',
-          choices: [
-            'Treating all patients exactly the same',
-            'Recognizing and respecting cultural differences',
-            "Learning every patient's language",
-            'Following only your own cultural beliefs',
-          ],
-          answer: 1,
-        },
-        {
-          question: 'What does stereotyping mean?',
-          choices: [
-            "Understanding someone's individual experiences",
-            'Respecting different cultures',
-            'Making assumptions about someone based on their group',
-            'Asking patients about their beliefs',
-          ],
-          answer: 2,
-        },
-        {
-          question: 'Which three groups are recognized as Indigenous peoples in Canada?',
-          choices: [
-            'First Nations, Métis, and Inuit',
-            'First Nations, Canadians, and Europeans',
-            'Inuit, immigrants, and Métis',
-            'Métis, French Canadians, and Inuit',
-          ],
-          answer: 0,
-        },
-        {
-          question: 'What is cultural humility?',
-          choices: [
-            'Knowing everything about another culture',
-            'Avoiding people from different cultures',
-            'Believing your culture is superior',
-            'Being open to learning from others and reflecting on your biases',
-          ],
-          answer: 3,
-        },
-        {
-          question: 'What is the purpose of a sharing circle?',
-          choices: [
-            'To allow one person to control the conversation',
-            'To provide a respectful space for sharing and listening',
-            'To replace all medical treatments',
-            'To make everyone agree on the same beliefs',
-          ],
-          answer: 1,
-        },
-      ],
-      medium: [],
-      big: [],
-    };
+    const BUBBLE_QUESTIONS = [
+      { question: 'What does Tachypnea mean?', choices: ['Slow breathing', 'Rapid breathing', 'Difficulty swallowing', 'Absence of breathing'], answer: 1 },
+      { question: 'What does Gastritis mean?', choices: ['Inflammation of the liver', 'Inflammation of the intestines', 'Inflammation of the stomach', 'Inflammation of the pancreas'], answer: 2 },
+      { question: 'What does Dyspnea mean?', choices: ['Difficulty breathing', 'Normal breathing', 'Rapid breathing', 'Absence of breathing'], answer: 0 },
+      { question: 'What does Emesis mean?', choices: ['Diarrhea', 'Indigestion', 'Constipation', 'Vomiting'], answer: 3 },
+      { question: 'What does Rhinorrhea mean?', choices: ['Nosebleed', 'Runny nose', 'Loss of smell', 'Nasal inflammation'], answer: 1 },
+      { question: 'What does Hemoptysis mean?', choices: ['Vomiting blood', 'Blood in the stool', 'Coughing up blood', 'Blood in the urine'], answer: 2 },
+      { question: 'What does Cholecystitis mean?', choices: ['Inflammation of the gallbladder', 'Inflammation of the liver', 'Presence of gallstones', 'Inflammation of the pancreas'], answer: 0 },
+      { question: 'What does Orthopnea mean?', choices: ['Abnormally slow breathing', 'Excessively deep breathing', 'Difficulty breathing during exercise', 'Difficulty breathing while lying flat'], answer: 3 },
+      { question: 'What does Dysphagia mean?', choices: ['Difficulty digesting food', 'Difficulty swallowing', 'Excessive hunger', 'Loss of appetite'], answer: 1 },
+      { question: 'What does Atelectasis mean?', choices: ['Fluid accumulation in the lungs', 'Infection of the bronchi', 'Partial or complete collapse of lung tissue', 'Blood clot in the lungs'], answer: 2 },
+    ];
+
+    // the hard questions swim around as fish instead of bubbles
+    const FISH_QUESTIONS = [
+      { question: 'What is the difference between Hypoxia and Hypoxemia?', choices: ['Hypoxia is low tissue oxygen; hypoxemia is low blood oxygen', 'Hypoxia is low blood oxygen; hypoxemia is low tissue oxygen', 'Both mean excessive carbon dioxide', 'Both mean complete absence of breathing'], answer: 0 },
+      { question: 'What does Cholelithiasis mean?', choices: ['Inflammation of the bile ducts', 'Surgical removal of the gallbladder', 'Inflammation of the liver', 'Presence of gallstones'], answer: 3 },
+      { question: 'What does Intussusception mean?', choices: ['Twisting of the intestine', 'One segment of intestine sliding into another', 'Inflammation of the small intestine', 'Abnormal intestinal pouches'], answer: 1 },
+      { question: 'What does Hematochezia mean?', choices: ['Vomiting blood', 'Black, tarry stool', 'Passage of fresh red blood through the rectum', 'Bleeding from the stomach into the esophagus'], answer: 2 },
+      { question: 'What does Pneumoconiosis mean?', choices: ['Lung disease caused by inhaled dust', 'Fluid accumulation in the lungs', 'Inflammation of the pleura', 'Permanent enlargement of the bronchi'], answer: 0 },
+    ];
 
     function rand(min, max) {
       return min + Math.random() * (max - min);
@@ -971,12 +2457,18 @@
       const dist = Math.hypot(tx - x, ty - y) || 1;
 
       const el = document.createElement('div');
-      el.className = 'floater ' + kind;
+      // fish get `fish-floater`, since plain `fish` is the drawing's class (which ignores clicks)
+      el.className = 'floater ' + (kind === 'fish' ? 'fish-floater' : kind);
       el.style.width = size + 'px';
       el.style.height = size + 'px';
       el.style.fontSize = size / 10 + 'px';
-      el.innerHTML = '<div class="floater-squish"><div class="sphere floater-ball"></div></div>';
-      el.querySelector('.floater-ball').style.animationDelay = -rand(0, 2.6) + 's';
+      const color = kind === 'fish' ? FISH_COLORS[fishCount++ % FISH_COLORS.length] : null;
+      if (color) {
+        el.innerHTML = '<div class="floater-squish">' + fishSvg(color) + '</div>';
+      } else {
+        el.innerHTML = '<div class="floater-squish"><div class="sphere floater-ball"></div></div>';
+        el.querySelector('.floater-ball').style.animationDelay = -rand(0, 2.6) + 's';
+      }
       floatLayer.appendChild(el);
 
       const f = {
@@ -989,19 +2481,124 @@
         vy: (ty - y) / dist * speed,
         entered: false,
         question,
+        kind,
+        color,
+        flip: false,
       };
       floaters.push(f);
       el.addEventListener('pointerdown', () => popFloater(f));
     }
 
+    // module 1 fish, same drawing as the menu fish but in a different colour each.
+    // every fish gets its own gradient ids so their colours don't clash
+    const FISH_COLORS = [
+      { body: ['#ffc27a', '#ff7a1a', '#b33f00'], fin: '#ffe2bf', line: '#5c2200' }, // orange
+      { body: ['#ffc2e0', '#ff5fa8', '#a3105a'], fin: '#ffe0f0', line: '#5a0830' }, // pink
+      { body: ['#c4ff9e', '#43c943', '#16702a'], fin: '#e6ffd6', line: '#0b3d15' }, // green
+      { body: ['#dcc2ff', '#9a5cff', '#4b1a9e'], fin: '#efe3ff', line: '#2a0b5c' }, // purple
+      { body: ['#fff2a0', '#ffcc1a', '#b37d00'], fin: '#fff8d6', line: '#5c3d00' }, // gold
+    ];
+    let fishCount = 0;
+    let fishIds = 0;
+
+    function fishSvg(c) {
+      const id = 'fish' + ++fishIds;
+      return `
+        <svg class="fish" viewBox="0 0 220 160" aria-hidden="true">
+          <defs>
+            <linearGradient id="${id}-body" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="${c.body[0]}" />
+              <stop offset="0.55" stop-color="${c.body[1]}" />
+              <stop offset="1" stop-color="${c.body[2]}" />
+            </linearGradient>
+            <linearGradient id="${id}-fin" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="${c.fin}" />
+              <stop offset="1" stop-color="${c.body[1]}" />
+            </linearGradient>
+          </defs>
+          <g class="fish-tail">
+            <path d="M70 80 C50 60 30 38 10 30 C22 55 22 105 10 130 C30 122 50 100 70 80 Z"
+              fill="url(#${id}-fin)" stroke="${c.line}" stroke-width="3" stroke-linejoin="round" />
+          </g>
+          <path d="M100 40 C112 12 150 8 170 30 C150 30 130 34 118 44 Z"
+            fill="url(#${id}-fin)" stroke="${c.line}" stroke-width="3" stroke-linejoin="round" />
+          <path d="M118 122 C124 140 142 146 156 140 C146 132 140 124 138 118 Z"
+            fill="url(#${id}-fin)" stroke="${c.line}" stroke-width="3" stroke-linejoin="round" />
+          <ellipse cx="128" cy="80" rx="74" ry="50" fill="url(#${id}-body)" stroke="${c.line}" stroke-width="3" />
+          <path d="M70 92 C100 128 168 132 196 98 C170 112 104 112 70 92 Z" fill="#ffffff" opacity="0.55" />
+          <path d="M162 46 C150 62 150 100 162 116" fill="none" stroke="${c.line}" stroke-width="3" stroke-linecap="round" opacity="0.6" />
+          <path d="M100 62 q8 8 0 16 M116 56 q8 8 0 16 M116 82 q8 8 0 16 M132 64 q8 8 0 16" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.4" />
+          <path d="M128 88 C120 102 124 112 138 112 C140 104 138 96 128 88 Z"
+            fill="url(#${id}-fin)" stroke="${c.line}" stroke-width="2.5" stroke-linejoin="round" />
+          <circle cx="176" cy="68" r="13" fill="#ffffff" stroke="${c.line}" stroke-width="2.5" />
+          <circle cx="179" cy="69" r="7" fill="${c.line}" />
+          <circle cx="182" cy="65" r="2.5" fill="#ffffff" />
+          <path d="M194 92 q6 4 0 8" fill="none" stroke="${c.line}" stroke-width="3" stroke-linecap="round" />
+          <ellipse cx="118" cy="50" rx="34" ry="9" fill="#ffffff" opacity="0.45" transform="rotate(-8 118 50)" />
+        </svg>`;
+    }
+
+    // bubble pop sound, generated rather than loaded: a quick rising "bloop" plus a tiny click.
+    // smaller bubbles pop higher, bigger ones lower
+    let popAudio = null;
+    function playPop(kind) {
+      try {
+        popAudio = popAudio || new (window.AudioContext || window.webkitAudioContext)();
+      } catch (e) {
+        return;
+      }
+      if (popAudio.state === 'suspended') popAudio.resume();
+      const t = popAudio.currentTime;
+      const base = { small: 720, medium: 520, big: 360 }[kind] || 550;
+
+      const osc = popAudio.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(base, t);
+      osc.frequency.exponentialRampToValueAtTime(base * 2.6, t + 0.06);
+      const tone = popAudio.createGain();
+      tone.gain.setValueAtTime(0.0001, t);
+      tone.gain.exponentialRampToValueAtTime(0.5, t + 0.005);
+      tone.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+      osc.connect(tone).connect(popAudio.destination);
+      osc.start(t);
+      osc.stop(t + 0.13);
+
+      const len = Math.floor(popAudio.sampleRate * 0.03);
+      const buffer = popAudio.createBuffer(1, len, popAudio.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+      const noise = popAudio.createBufferSource();
+      noise.buffer = buffer;
+      const highpass = popAudio.createBiquadFilter();
+      highpass.type = 'highpass';
+      highpass.frequency.value = 1500;
+      const click = popAudio.createGain();
+      click.gain.value = 0.25;
+      noise.connect(highpass).connect(click).connect(popAudio.destination);
+      noise.start(t);
+    }
+
     function popFloater(f) {
       if (quizOpen) return;
+      if (f.kind === 'fish') {
+        explodeFish(f);
+        return;
+      }
+      playPop(f.kind);
       // bubbles without a question yet stay put and just give a little squish
       if (!f.question) {
         squish(f, Math.random() < 0.5 ? 'x' : 'y');
         return;
       }
       floaters = floaters.filter(other => other !== f);
+      openQuiz(f);
+    }
+
+    // the fish blows up in red straight away and its question opens on a big fish of the same colour
+    function explodeFish(f) {
+      floaters = floaters.filter(other => other !== f);
+      playSound(explosionSound);
+      spawnBlood(f.el, page);
       openQuiz(f);
     }
 
@@ -1020,12 +2617,21 @@
         </div>
         <div class="quiz-answers"></div>
         <div class="quiz-feedback"></div>`;
-      quiz.querySelector('.quiz-question').textContent = q.question;
+      const questionEl = quiz.querySelector('.quiz-question');
+      questionEl.textContent = q.question;
+      if (q.question.length > 90) questionEl.classList.add('long');
 
       const qBubble = quiz.querySelector('.quiz-bubble');
-      const size = Math.min(window.innerWidth * 0.8, window.innerHeight * 0.45, 420);
+      // long scenario questions also show an explanation, so their bubble is smaller to leave room
+      const size = Math.min(window.innerWidth * 0.8, window.innerHeight * (q.explanation ? 0.34 : 0.45), 420);
       qBubble.style.width = size + 'px';
       qBubble.style.height = size + 'px';
+      // a popped fish shows its question on a big fish of the same colour (the drawing is 220 x 160)
+      if (f.color) {
+        qBubble.classList.add('quiz-fish');
+        qBubble.querySelector('.floater-ball').outerHTML = fishSvg(f.color);
+        qBubble.style.width = Math.min(size * 220 / 160, window.innerWidth - 32) + 'px';
+      }
       qBubble.style.fontSize = size / 10 + 'px';
 
       const answersEl = quiz.querySelector('.quiz-answers');
@@ -1044,14 +2650,32 @@
             else b.classList.add('dim');
           });
           const message = document.createElement('div');
-          message.textContent = i === q.answer
-            ? 'Correct!'
-            : `Not quite. The answer is ${'ABCD'[q.answer]}.`;
+          if (i === q.answer) {
+            playSound(correctSound, CORRECT_SOUND_START);
+            const earned = POINTS[f.kind];
+            addPoints(earned);
+            updateStreak(true);
+            message.textContent = `Correct! +${earned} ${earned === 1 ? 'point' : 'points'}` +
+              (streak >= 2 ? ` · ${streak} in a row!` : '');
+          } else {
+            playSound(wrongSound);
+            const lost = streak;
+            updateStreak(false);
+            message.textContent = `Not quite. The answer is ${'ABCD'[q.answer]}.` +
+              (lost >= 2 ? ` Your streak of ${lost} is over.` : '');
+          }
           const next = document.createElement('button');
           next.className = 'continue';
           next.textContent = 'Continue';
           next.addEventListener('click', () => closeQuiz(quiz, qBubble));
-          feedback.append(message, next);
+          feedback.append(message);
+          if (q.explanation) {
+            const why = document.createElement('div');
+            why.className = 'quiz-explanation';
+            why.textContent = q.explanation;
+            feedback.append(why);
+          }
+          feedback.append(next);
         });
         answersEl.appendChild(btn);
         return btn;
@@ -1076,6 +2700,10 @@
         if (e.target !== quiz) return;
         quiz.remove();
         quizOpen = false;
+        if (prizePending) {
+          prizePending = false;
+          showPrize();
+        }
       });
     }
 
@@ -1113,6 +2741,12 @@
           if (f.y + f.size > H) { f.y = H - f.size; f.vy = -Math.abs(f.vy); squish(f, 'y'); }
         }
 
+        // fish face the way they're swimming
+        if (f.kind === 'fish' && (f.vx < 0) !== f.flip) {
+          f.flip = f.vx < 0;
+          f.el.classList.toggle('flip', f.flip);
+        }
+
         f.el.style.transform = `translate(${f.x}px, ${f.y}px)`;
       });
 
@@ -1124,15 +2758,13 @@
       page.classList.add('intro-done');
       clearTimeout(floatStartTimer);
 
-      const kinds = [
-        ...Array(5).fill('small'),
-        ...Array(4).fill('medium'),
-        ...Array(3).fill('big'),
+      // 10 medium bubbles and 5 fish, each with its own question, released in random order
+      const items = [
+        ...BUBBLE_QUESTIONS.map(question => ({ kind: 'medium', question })),
+        ...FISH_QUESTIONS.map(question => ({ kind: 'fish', question })),
       ].sort(() => Math.random() - 0.5);
-
-      // the order is already shuffled, so handing questions out in order lands them on random bubbles
-      const used = { small: 0, medium: 0, big: 0 };
-      const questions = kinds.map(kind => QUESTIONS[kind][used[kind]++]);
+      const kinds = items.map(item => item.kind);
+      const questions = items.map(item => item.question);
 
       // release them one after another, cycling through top, right, bottom, left
       const session = floatSession;
@@ -1155,32 +2787,377 @@
       floaters = [];
       floatLayer.innerHTML = '';
       quizOpen = false;
-      page.querySelectorAll('.quiz').forEach(q => q.remove());
+      page.querySelectorAll('.quiz, .prize').forEach(q => q.remove());
     }
 
     document.getElementById('skip').addEventListener('click', startFloaters);
 
-    // ---- module 2 model ----
-    // spot in the background image (in its own pixels) where the model stands: just right of the bed
-    const sceneModel = document.getElementById('scene-model');
-    const SCENE = { imgW: 1672, imgH: 941, centerX: 1060, floorY: 770, w: 380, h: 540 };
+    // ---- module 2 scene ----
+    // spots in the background image (in its own pixels, 1672x941) where things stand
+    const SCENE_IMG = { w: 1672, h: 941 };
+    const SCENE_ITEMS = [
+      // patient, just right of the bed
+      { el: document.getElementById('scene-patient'), centerX: 1075, floorY: 705, w: 144, h: 390 },
+      // nurse, in front of the bed on its left (pillow) side
+      { el: document.getElementById('scene-nurse'), centerX: 520, floorY: 865, w: 145, h: 535 },
+      // the same patient sitting in a chair, in the same spot
+      { el: document.getElementById('scene-patient-sitting'), centerX: 1075, floorY: 712, w: 140, h: 285, head: [0.6, 0.02] },
+      // lying on the bed with his head by the pillow; `head` is where a speech bubble's tail points
+      { el: document.getElementById('scene-patient-lying'), centerX: 755, floorY: 592, w: 400, h: 144, head: [0.2, 0.02] },
+      // nurse holding out the pill bottle, just left of the patient
+      { el: document.getElementById('scene-nurse-giving'), centerX: 965, floorY: 718, w: 172, h: 420 },
+      // patient collapsed on the open floor in front of the bed
+      { el: document.getElementById('scene-patient-down'), centerX: 820, floorY: 925, w: 470, h: 270 },
+    ];
 
     // the background uses `cover`, so work out how the image is scaled and cropped,
-    // then map the spot onto the screen so the model stays beside the bed at any window size
-    function placeSceneModel() {
+    // then map each spot onto the screen so things stay put at any window size
+    function placeSceneItems() {
       const W = window.innerWidth;
       const H = window.innerHeight;
-      const s = Math.max(W / SCENE.imgW, H / SCENE.imgH);
-      const offX = (W - SCENE.imgW * s) / 2;
-      const offY = (H - SCENE.imgH * s) / 2;
-      sceneModel.style.width = SCENE.w * s + 'px';
-      sceneModel.style.height = SCENE.h * s + 'px';
-      sceneModel.style.left = offX + (SCENE.centerX - SCENE.w / 2) * s + 'px';
-      sceneModel.style.top = offY + (SCENE.floorY - SCENE.h) * s + 'px';
+      const s = Math.max(W / SCENE_IMG.w, H / SCENE_IMG.h);
+      const offX = (W - SCENE_IMG.w * s) / 2;
+      const offY = (H - SCENE_IMG.h * s) / 2;
+      SCENE_ITEMS.forEach(item => {
+        item.el.style.width = item.w * s + 'px';
+        item.el.style.height = item.h * s + 'px';
+        item.el.style.left = offX + (item.centerX - item.w / 2) * s + 'px';
+        item.el.style.top = offY + (item.floorY - item.h) * s + 'px';
+      });
+
+      // each speech bubble's tail sits just above and right of the speaker's head
+      const patientItem = SCENE_ITEMS[page.classList.contains('patient-lying') ? 3
+        : page.classList.contains('patient-sat') ? 2 : 0];
+      [[speech, patientItem], [nurseSpeech, SCENE_ITEMS[1]]].forEach(([bubble, p]) => {
+        const [hx, hy] = p.head || [0.65, 0.03];
+        const headX = offX + (p.centerX + p.w * (hx - 0.5)) * s;
+        const headY = offY + (p.floorY - p.h * (1 - hy)) * s;
+        bubble.style.left = Math.max(16, Math.min(headX, W - 270 - 16)) + 'px'; // 270 = its CSS width
+        bubble.style.top = headY + 'px';
+      });
     }
 
-    placeSceneModel();
-    window.addEventListener('resize', placeSceneModel);
+    // ---- module 2 scenario ----
+    // the scenario card shrinks to a tab after a few seconds of reading, then the patient speaks
+    const scenario = document.getElementById('scenario');
+    const speech = document.getElementById('speech');
+    const nurseSpeech = document.getElementById('nurse-speech');
+    const nurseChoices = document.getElementById('nurse-choices');
+    const nurseFeedback = nurseChoices.querySelector('.nurse-feedback');
+    const SCENARIO_MINIMIZE_AT = 8500; // card pops in at 4.4s, so about 4s to read it
+    const SPEECH_AT = 8900;
+    const SPEECH_FOR = 3000; // how long the bubble stays before he starts coughing
+    const CHOICES_AT = SPEECH_AT + SPEECH_FOR + 3800; // once the cough (about 3.5s) is over
+    const PANEL_LEAVES_AFTER = 1600; // after the right answer, a moment to see it marked correct
+    const OKAY_AFTER = 2200; // then he answers the nurse once the panel is out of the way
+    const LIE_FOR = 3500; // how long he lies on the bed after the rude choice
+    const GIVE_FOR = 2500; // how long the nurse holds out the wrong pills
+    const yellSound = new Audio('images/virtual_vibes-angry-man-yell-sound-hd-379386.mp3');
+    yellSound.preload = 'auto';
+    const speechText = speech.querySelector('.speech-text');
+    const PATIENT_LINE = speechText.textContent;
+    const okaySound = new Audio('images/freesound_community-male_okay-38613.mp3');
+    okaySound.preload = 'auto';
+    const awesomeSound = new Audio('images/floraphonic-man-says-awesome-184037.mp3');
+    awesomeSound.preload = 'auto';
+    const REPLY_FOR = 2500; // how long his reply bubble stays up
+
+    // the scenario's questions, one after another. Each wrong pick explains why and lets them
+    // try again; the right one moves on to the next step.
+    // `say`: the choices are things the nurse says, so they're shown in quotes and she says the right one
+    // `intro`: what the nurse tells the player before the question
+    const STEPS = [
+      {
+        title: 'What should the nurse say?',
+        say: true,
+        replySound: okaySound,
+        sit: true, // he sits down as he answers
+        choices: [
+          { text: "Let's get you sitting upright right now so I can check how you're breathing.", correct: true,
+            why: 'Sitting upright helps the lungs expand, and checking his breathing is the first priority.' },
+          // `lie`: he does lie down on the bed and speaks, then the question comes back
+          { text: 'Get on the bed bro', lie: true, says: 'wanna join me ;)',
+            why: "That's not a professional or caring way to speak to a patient." },
+          // `meds`: the nurse hands him the pills, then he collapses on the floor yelling
+          { text: 'Give him the wrong medication', meds: true,
+            why: 'Giving the wrong medication is a serious error that could harm the patient.' },
+          { text: "I dont know what to do",
+            why: 'The patient needs help right away. Stay calm and act on what you see.' },
+        ],
+      },
+      {
+        intro: "Good job helping the patient sit upright! I noticed he was breathing unusually fast while standing, even though he wasn't exercising. Based on his symptoms, what medical term describes his breathing pattern?",
+        title: 'What condition is the patient experiencing?',
+        choices: [
+          { text: 'Bradypnea',
+            why: 'Bradypnea is abnormally slow breathing, but his breathing was fast.' },
+          { text: 'Tachypnea', correct: true,
+            why: 'Tachypnea means abnormally rapid breathing, just like his.' },
+          { text: 'Apnea',
+            why: "Apnea means no breathing at all, but he's still breathing." },
+          { text: 'Eupnea',
+            why: 'Eupnea is normal breathing, but his breathing was unusually fast.' },
+        ],
+        // after the right answer the nurse tells him, and he replies
+        nurseSays: "It looks like you have tachypnea. That means you're breathing faster than normal.",
+        reply: 'Awesome',
+        replySound: awesomeSound,
+      },
+    ];
+    const NEXT_STEP_AFTER = 5000; // after a right answer, time for the reaction before the next question
+    const choicesIntro = nurseChoices.querySelector('.nurse-choices-intro');
+    const choicesGrid = nurseChoices.querySelector('.quiz-answers');
+    let step = 0;
+    let choiceButtons = [];
+
+    function renderStep(n) {
+      step = n;
+      const s = STEPS[n];
+      choicesIntro.hidden = !s.intro;
+      choicesIntro.querySelector('.nurse-choices-line').textContent = s.intro || '';
+      nurseChoices.querySelector('.nurse-choices-title').textContent = s.title;
+      nurseFeedback.textContent = '';
+      choicesGrid.innerHTML = '';
+      choiceButtons = s.choices.map((choice, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'answer';
+        btn.style.animationDelay = 0.3 + i * 0.1 + 's';
+        btn.innerHTML = `<span class="answer-letter">${'ABCD'[i]}</span><span></span>`;
+        btn.lastChild.textContent = s.say ? `"${choice.text}"` : choice.text;
+        btn.addEventListener('click', () => pickChoice(i));
+        choicesGrid.appendChild(btn);
+        return btn;
+      });
+    }
+
+    function pickChoice(i) {
+      const s = STEPS[step];
+      const choice = s.choices[i];
+      const btn = choiceButtons[i];
+      btn.disabled = true;
+      if (!choice.correct) {
+        playSound(wrongSound);
+        btn.classList.add('wrong');
+        nurseFeedback.innerHTML = '<b>Not quite.</b> ';
+        nurseFeedback.append(choice.why + ' Try again!');
+        if (choice.lie) lieDown(choice.says);
+        if (choice.meds) giveWrongMeds();
+        return;
+      }
+      // right answer: the other choices fade, then the panel slides away
+      playSound(correctSound, CORRECT_SOUND_START);
+      choiceButtons.forEach(b => {
+        b.disabled = true;
+        if (b !== btn && !b.classList.contains('wrong')) b.classList.add('dim');
+      });
+      btn.classList.add('correct');
+      nurseFeedback.innerHTML = s.say ? '<b>Great choice!</b> ' : '<b>Correct!</b> ';
+      nurseFeedback.append(choice.why);
+      // the panel gets out of the way quickly so the conversation is visible
+      sceneTimers.push(
+        setTimeout(() => nurseChoices.classList.add('leaving'), PANEL_LEAVES_AFTER),
+        setTimeout(() => nurseChoices.classList.remove('show', 'leaving'), PANEL_LEAVES_AFTER + 400),
+      );
+      // the nurse says her line to him, then he answers (out loud, and in a bubble if it has text)
+      nurseSpeech.querySelector('.speech-text').textContent = s.say ? choice.text : s.nurseSays;
+      nurseSpeech.classList.remove('leaving');
+      nurseSpeech.classList.add('show');
+      placeSceneItems();
+      unlockSound(s.replySound);
+      sceneTimers.push(setTimeout(() => {
+        playSound(s.replySound);
+        if (s.sit) page.classList.add('patient-sat');
+        if (s.reply) {
+          speechText.textContent = s.reply;
+          speech.classList.add('show');
+          placeSceneItems();
+          sceneTimers.push(
+            setTimeout(() => speech.classList.add('leaving'), REPLY_FOR),
+            setTimeout(() => speech.classList.remove('show', 'leaving'), REPLY_FOR + 350),
+          );
+        }
+      }, OKAY_AFTER));
+      if (step + 1 === STEPS.length) {
+        // last question done: once his reply is over, the scenario's end menu comes up
+        sceneTimers.push(setTimeout(showSceneEnd, OKAY_AFTER + (s.reply ? REPLY_FOR + 600 : 1200)));
+      } else {
+        // her speech bubble makes way for the next question
+        sceneTimers.push(
+          setTimeout(() => {
+            nurseSpeech.classList.add('leaving');
+            renderStep(step + 1);
+            nurseChoices.classList.add('show');
+          }, NEXT_STEP_AFTER),
+          setTimeout(() => nurseSpeech.classList.remove('show', 'leaving'), NEXT_STEP_AFTER + 350),
+        );
+      }
+    }
+
+    // the choices slide away, he lies on the bed and speaks, then he stands back up and the
+    // choices return with the picked one still crossed out
+    function lieDown(line) {
+      choiceButtons.forEach(b => { b.disabled = true; });
+      nurseChoices.classList.add('leaving');
+      page.classList.add('patient-lying');
+      speechText.textContent = line;
+      speech.classList.add('show');
+      placeSceneItems();
+      sceneTimers.push(
+        setTimeout(() => nurseChoices.classList.remove('show', 'leaving'), 400),
+        setTimeout(() => speech.classList.add('leaving'), LIE_FOR),
+        setTimeout(() => {
+          speech.classList.remove('show', 'leaving');
+          page.classList.remove('patient-lying');
+          choiceButtons.forEach(b => { b.disabled = b.classList.contains('wrong'); });
+          nurseChoices.classList.add('show');
+        }, LIE_FOR + 350),
+      );
+    }
+
+    // the nurse walks over and hands him the pills, goes back to her spot, and he collapses
+    // on the floor yelling with the music dipped; then he's back up and the choices return
+    function giveWrongMeds() {
+      choiceButtons.forEach(b => { b.disabled = true; });
+      unlockSound(yellSound);
+      nurseChoices.classList.add('leaving');
+      page.classList.add('nurse-giving');
+      sceneTimers.push(
+        setTimeout(() => nurseChoices.classList.remove('show', 'leaving'), 400),
+        setTimeout(() => {
+          page.classList.remove('nurse-giving');
+          page.classList.add('patient-down');
+          if (!module2Music.paused) fadeMusic(module2Music, COUGH_MUSIC_VOLUME, 400);
+          playSound(yellSound);
+          const yellMs = (isFinite(yellSound.duration) ? yellSound.duration : 4) * 1000;
+          sceneTimers.push(setTimeout(() => {
+            page.classList.remove('patient-down');
+            if (!module2Music.paused) fadeMusic(module2Music, MUSIC_VOLUME, 1200);
+            choiceButtons.forEach(b => { b.disabled = b.classList.contains('wrong'); });
+            nurseChoices.classList.add('show');
+          }, yellMs + 800));
+        }, GIVE_FOR),
+      );
+    }
+
+    // end of the scenario: same pop-up card as the module 1 prize, with replay / next / main menu
+    function showSceneEnd() {
+      const end = document.createElement('div');
+      end.className = 'prize scene-end';
+      end.innerHTML = `
+        <div class="prize-card">
+          <svg class="prize-star" viewBox="0 0 100 100" aria-hidden="true">
+            <defs>
+              <linearGradient id="end-star-gold" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#fffbe0" />
+                <stop offset="0.5" stop-color="#ffd93d" />
+                <stop offset="1" stop-color="#f4a100" />
+              </linearGradient>
+            </defs>
+            <path d="M50 6 L62 36 L94 38 L69 58 L78 90 L50 72 L22 90 L31 58 L6 38 L38 36 Z"
+              fill="url(#end-star-gold)" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" />
+            <ellipse cx="42" cy="32" rx="9" ry="5" fill="#ffffff" opacity="0.6" transform="rotate(-25 42 32)" />
+          </svg>
+          <div class="prize-kicker">Scenario 1</div>
+          <h2>Complete!</h2>
+          <p>You helped the nurse care for a patient who was short of breath.</p>
+          <div class="prize-actions">
+            <button class="prize-btn" data-action="replay">Replay</button>
+            <button class="prize-btn" data-action="next">Next ▸</button>
+            <button class="prize-btn secondary" data-action="menu">Main menu</button>
+          </div>
+        </div>`;
+      end.querySelector('[data-action="replay"]').addEventListener('click', replayScene);
+      end.querySelector('[data-action="next"]').addEventListener('click', startScenario2);
+      end.querySelector('[data-action="menu"]').addEventListener('click', () => back.click());
+      page.appendChild(end);
+
+      playSound(winSound);
+      if (!module2Music.paused) {
+        fadeMusic(module2Music, 0.08, 300);
+        sceneTimers.push(setTimeout(() => {
+          if (!module2Music.paused) fadeMusic(module2Music, MUSIC_VOLUME, 1200);
+        }, 3600));
+      }
+    }
+
+    // start scenario 1 over, including the opening line and the scenario card
+    function replayScene() {
+      page.className = 'page';
+      void page.offsetWidth; // let the CSS intro animations play again
+      page.className = 'page module-2';
+      startScene();
+    }
+
+    // scenario 2: a new room and its own music track
+    function startScenario2() {
+      stopScene();
+      page.classList.add('scenario-2');
+      fadeMusic(module2Music, 0, 500, () => module2Music.pause());
+      startModuleMusic('scenario2');
+    }
+
+    function resetChoices() {
+      nurseChoices.classList.remove('show', 'leaving');
+      nurseSpeech.classList.remove('show', 'leaving');
+      page.querySelectorAll('.scene-end').forEach(end => end.remove());
+      renderStep(0);
+    }
+
+    renderStep(0);
+    const COUGH_MUSIC_VOLUME = 0.05; // music drops this low so the cough is clearly heard
+    const coughSound = new Audio('images/oceaneyes91-coughing-man-242770.mp3');
+    coughSound.preload = 'auto';
+    let sceneTimers = [];
+
+    // music comes back up once he's done coughing
+    coughSound.addEventListener('ended', () => {
+      if (!module2Music.paused) fadeMusic(module2Music, MUSIC_VOLUME, 1200);
+    });
+
+    function setScenarioOpen(open) {
+      scenario.classList.toggle('minimized', !open);
+      scenario.setAttribute('aria-expanded', open);
+    }
+
+    scenario.addEventListener('click', () => {
+      setScenarioOpen(scenario.classList.contains('minimized'));
+    });
+
+    function startScene() {
+      stopScene();
+      setScenarioOpen(true);
+      sceneTimers.push(
+        setTimeout(() => setScenarioOpen(false), SCENARIO_MINIMIZE_AT),
+        setTimeout(() => {
+          speech.classList.add('show');
+          placeSceneItems();
+        }, SPEECH_AT),
+        // the bubble goes away and he coughs, with the music dipped underneath
+        setTimeout(() => {
+          speech.classList.add('leaving');
+          if (!module2Music.paused) fadeMusic(module2Music, COUGH_MUSIC_VOLUME, 400);
+          playSound(coughSound);
+        }, SPEECH_AT + SPEECH_FOR),
+        setTimeout(() => speech.classList.remove('show', 'leaving'), SPEECH_AT + SPEECH_FOR + 350),
+        setTimeout(() => nurseChoices.classList.add('show'), CHOICES_AT),
+      );
+    }
+
+    function stopScene() {
+      sceneTimers.forEach(clearTimeout);
+      sceneTimers = [];
+      speech.classList.remove('show', 'leaving');
+      page.classList.remove('patient-sat', 'patient-lying', 'patient-down', 'nurse-giving');
+      speechText.textContent = PATIENT_LINE;
+      okaySound.pause();
+      awesomeSound.pause();
+      yellSound.pause();
+      resetChoices();
+      coughSound.pause();
+    }
+
+    placeSceneItems();
+    window.addEventListener('resize', placeSceneItems);
 
     function spawnDroplets(bubble, parent = home) {
       const rect = bubble.getBoundingClientRect();
@@ -1205,16 +3182,288 @@
       }
     }
 
+    // splatter: a flash, droplets that arc out and fall, and a few splats.
+    // `spread` is roughly how far it reaches; `kind` is '' for red or 'poo' for brown
+    function spawnSplatter(cx, cy, spread, kind = '', parent = home) {
+      const big = kind === 'poo';
+
+      const flash = document.createElement('div');
+      flash.className = 'blood-flash ' + kind;
+      flash.style.left = cx + 'px';
+      flash.style.top = cy + 'px';
+      flash.style.width = flash.style.height = spread * 1.6 + 'px';
+      parent.appendChild(flash);
+      flash.addEventListener('animationend', () => flash.remove());
+
+      for (let i = 0; i < (big ? 70 : 48); i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = spread * rand(0.5, 1.9);
+        const dx = Math.cos(angle) * dist;
+        const dy = Math.sin(angle) * dist;
+        const fall = spread * rand(0.3, 0.9);
+        const size = rand(5, 26) * (big ? 1.6 : 1);
+        // every third drop is a streak stretched along its direction of travel
+        const shape = i % 3 === 0 ? ` rotate(${angle}rad) scale(1.9, 0.6)` : '';
+
+        const drop = document.createElement('div');
+        drop.className = 'blood ' + kind;
+        drop.style.left = cx + 'px';
+        drop.style.top = cy + 'px';
+        drop.style.width = drop.style.height = size + 'px';
+        parent.appendChild(drop);
+        drop.animate([
+          { transform: `translate(-50%, -50%)${shape} scale(1)`, opacity: 1 },
+          { transform: `translate(calc(-50% + ${dx * 0.65}px), calc(-50% + ${dy * 0.65}px))${shape}`, opacity: 1, offset: 0.4 },
+          { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy + fall}px))${shape} scale(0.6)`, opacity: 0 },
+        ], { duration: rand(900, 1400), easing: 'cubic-bezier(0.2, 0.7, 0.4, 1)', fill: 'forwards' })
+          .onfinish = () => drop.remove();
+      }
+
+      for (let i = 0; i < (big ? 18 : 9); i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = spread * rand(0.2, 1.1);
+        const size = spread * rand(0.12, 0.27);
+        const splat = document.createElement('div');
+        splat.className = 'blood ' + kind;
+        splat.style.left = cx + Math.cos(angle) * dist + 'px';
+        splat.style.top = cy + Math.sin(angle) * dist + 'px';
+        splat.style.width = size + 'px';
+        splat.style.height = size * rand(0.6, 0.9) + 'px';
+        splat.style.borderRadius = '60% 40% 55% 45% / 50% 60% 40% 50%';
+        parent.appendChild(splat);
+        splat.animate([
+          { transform: 'translate(-50%, -50%) scale(0)', opacity: 1 },
+          { transform: 'translate(-50%, -50%) scale(1.1)', opacity: 1, offset: 0.2 },
+          { transform: 'translate(-50%, -50%) scale(1)', opacity: 0.9, offset: 0.6 },
+          { transform: 'translate(-50%, -50%) scale(1)', opacity: 0 },
+        ], { duration: big ? 1700 : 1200, delay: rand(0, 120), easing: 'ease-out', fill: 'both' })
+          .onfinish = () => splat.remove();
+      }
+    }
+
+    function spawnBlood(el, parent = home) {
+      const rect = el.getBoundingClientRect();
+      spawnSplatter(rect.left + rect.width / 2, rect.top + rect.height / 2, rect.width, '', parent);
+    }
+
+    // poop flies from his bum straight at the screen, then splats across it
+    function launchPoop(bubble, onSplat) {
+      const rect = bubble.getBoundingClientRect();
+      const startX = rect.left + rect.width * 0.5;
+      const startY = rect.top + rect.height * 0.8;
+      const endX = window.innerWidth / 2;
+      const endY = window.innerHeight / 2;
+
+      const shot = document.createElement('div');
+      shot.className = 'poop-shot';
+      shot.innerHTML = `
+        <svg viewBox="0 0 100 100" width="100%" height="100%">
+          <defs>
+            <radialGradient id="poo-fill" cx="0.35" cy="0.3" r="0.8">
+              <stop offset="0" stop-color="#b0814a" />
+              <stop offset="0.55" stop-color="#6b4220" />
+              <stop offset="1" stop-color="#3d2410" />
+            </radialGradient>
+          </defs>
+          <path d="M18 84 Q50 94 82 84 Q94 76 84 67 Q92 57 79 51 Q85 40 70 36 Q72 22 54 12 Q58 27 44 31 Q29 33 32 46 Q17 50 23 60 Q8 69 18 84 Z"
+            fill="url(#poo-fill)" stroke="#2a1608" stroke-width="3" stroke-linejoin="round" />
+          <path d="M30 62 Q50 68 70 62 M36 45 Q50 50 64 45" fill="none" stroke="#2a1608" stroke-width="2.5" stroke-linecap="round" opacity="0.5" />
+          <ellipse cx="40" cy="38" rx="7" ry="3.5" fill="#ffffff" opacity="0.35" transform="rotate(-20 40 38)" />
+        </svg>`;
+      home.appendChild(shot);
+
+      const flight = 600;
+      shot.animate([
+        { transform: `translate(${startX}px, ${startY}px) scale(0.4) rotate(0deg)` },
+        { transform: `translate(${endX}px, ${endY}px) scale(14) rotate(200deg)` },
+      ], { duration: flight, easing: 'cubic-bezier(0.55, 0, 0.9, 0.5)', fill: 'forwards' });
+
+      setTimeout(() => {
+        shot.remove();
+        spawnSplatter(endX, endY, Math.max(window.innerWidth, window.innerHeight) * 0.45, 'poo');
+        onSplat();
+      }, flight);
+    }
+
+    const fish = document.getElementById('fish');
+    const patient = document.getElementById('patient');
+    const poopSound = new Audio('images/freesound_community-fart-with-reverb-39675.mp3');
+    poopSound.preload = 'auto';
+    const explosionSound = new Audio(encodeURI('images/Explosion Sound Effect - Soundspace Sound Effects (320k).mp3'));
+    explosionSound.preload = 'auto';
+    const correctSound = new Audio('images/dragon-studio-correct-472358.mp3');
+    correctSound.preload = 'auto';
+    const CORRECT_SOUND_START = 0; // this file starts right away, no silence to skip
+    const wrongSound = new Audio('images/lesiakower-error-mistake-sound-effect-incorrect-answer-437420.mp3');
+    wrongSound.preload = 'auto';
+    const winSound = new Audio('images/freesound_community-level-win-6416.mp3');
+    winSound.preload = 'auto';
+
+    // Safari only allows sound started directly by a click, so a sound that plays a moment later
+    // is started silently during the click to unlock it
+    function unlockSound(sound) {
+      sound.muted = true;
+      sound.play().then(() => sound.pause()).catch(() => {});
+    }
+
+    // `from` skips silence at the start of a file (in seconds)
+    function playSound(sound, from = 0) {
+      sound.muted = false;
+      sound.currentTime = from;
+      sound.play().catch(() => {});
+    }
+
+    // ---- main menu music ----
+    // browsers block sound until the visitor interacts with the page, so if autoplay is refused
+    // the music starts on their first click or key press instead
+    const MUSIC_VOLUME = 0.35;
+    const menuMusic = new Audio(encodeURI('images/Yume no Tsubasa PS1 OST - TRACK 12 - Longing for AIR. - PS1 Soundtracks (320k).mp3'));
+    menuMusic.loop = true;
+    menuMusic.volume = 0;
+    const musicBtn = document.getElementById('music-btn');
+    let musicWanted = true;
+    try { musicWanted = localStorage.getItem('menuMusic') !== 'off'; } catch (e) {}
+    // modules 1 and 2 have their own tracks; they follow the same on/off setting as the menu music
+    const moduleMusic = new Audio('images/UNITY.mp3');
+    const module2Music = new Audio('images/op234.mp3');
+    const scenario2Music = new Audio('images/cade-parker-10-23-23-sterile-128-ytshorts.savetube.me.mp3');
+    const MODULE_MUSIC = { 1: moduleMusic, 2: module2Music, scenario2: scenario2Music };
+    Object.values(MODULE_MUSIC).forEach(track => {
+      track.loop = true;
+      track.volume = 0;
+      track.preload = 'auto';
+    });
+
+    // fade an audio element's volume to `target` over `ms`, then optionally run `then`
+    function fadeMusic(audio, target, ms, then) {
+      clearInterval(audio.fadeTimer);
+      const start = audio.volume;
+      const steps = Math.max(1, Math.round(ms / 30));
+      let i = 0;
+      audio.fadeTimer = setInterval(() => {
+        i++;
+        audio.volume = Math.min(1, Math.max(0, start + (target - start) * (i / steps)));
+        if (i >= steps) {
+          clearInterval(audio.fadeTimer);
+          if (then) then();
+        }
+      }, 30);
+    }
+
+    function startMenuMusic() {
+      musicBtn.classList.toggle('muted', !musicWanted);
+      if (!musicWanted || home.classList.contains('hidden')) return;
+      menuMusic.play()
+        .then(() => fadeMusic(menuMusic, MUSIC_VOLUME, 1500))
+        .catch(() => waitForFirstInteraction());
+    }
+
+    function stopMenuMusic(ms = 600) {
+      fadeMusic(menuMusic, 0, ms, () => menuMusic.pause());
+    }
+
+    let currentModuleTrack = null; // the module track that should be playing right now
+
+    function startModuleMusic(module) {
+      const track = MODULE_MUSIC[module];
+      if (!musicWanted || !track) return;
+      currentModuleTrack = track;
+      clearInterval(track.fadeTimer);
+      track.muted = false;
+      track.volume = 0;
+      track.currentTime = 0;
+      track.play().then(() => {
+        // it may have finished loading after the player already left; if so, keep it quiet
+        if (currentModuleTrack === track) fadeMusic(track, MUSIC_VOLUME, 1500);
+        else track.pause();
+      }).catch(() => {});
+    }
+
+    function stopModuleMusic() {
+      currentModuleTrack = null;
+      Object.values(MODULE_MUSIC).forEach(track => {
+        if (!track.paused) fadeMusic(track, 0, 500, () => track.pause());
+      });
+    }
+
+    function waitForFirstInteraction() {
+      const unlock = e => {
+        // a click on a module is leaving the menu anyway, and the music button handles itself
+        if (busy || musicBtn.contains(e.target)) return;
+        document.removeEventListener('pointerdown', unlock);
+        document.removeEventListener('keydown', unlock);
+        startMenuMusic();
+      };
+      document.addEventListener('pointerdown', unlock);
+      document.addEventListener('keydown', unlock);
+    }
+
+    musicBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      // music is on but the browser hasn't let it start yet: this click starts it
+      if (musicWanted && menuMusic.paused) {
+        startMenuMusic();
+        return;
+      }
+      musicWanted = !musicWanted;
+      try { localStorage.setItem('menuMusic', musicWanted ? 'on' : 'off'); } catch (err) {}
+      if (musicWanted) startMenuMusic();
+      else {
+        musicBtn.classList.add('muted');
+        stopMenuMusic(300);
+      }
+    });
+
+    startMenuMusic();
+
     bubbles.forEach(bubble => {
       bubble.addEventListener('click', () => {
         if (busy) return;
         busy = true;
 
-        bubble.classList.add('burst');
+        if (bubble.classList.contains('fish-bubble')) {
+          // the fish freezes in place and thrashes its tail, then explodes
+          unlockSound(explosionSound);
+          if (musicWanted) unlockSound(moduleMusic);
+          bubble.classList.add('hold');
+          fish.classList.add('wiggle');
+          setTimeout(() => {
+            playSound(explosionSound); // boom right as it explodes
+            leaveMenu(bubble, 'fish');
+          }, 750);
+        } else if (bubble.classList.contains('patient-bubble')) {
+          // the patient turns around, wiggles, and poops at the screen
+          unlockSound(poopSound);
+          if (musicWanted) unlockSound(module2Music);
+          unlockSound(coughSound);
+          bubble.classList.add('hold', 'turned');
+          patient.classList.add('turn-out');
+          setTimeout(() => {
+            patient.classList.remove('turn-out');
+            patient.classList.add('facing-away', 'turn-in');
+          }, 160);
+          setTimeout(() => {
+            // sound starts a moment before the poop comes out
+            playSound(poopSound);
+          }, 600);
+          setTimeout(() => launchPoop(bubble, () => leaveMenu(bubble, 'poo')), 850);
+        } else {
+          leaveMenu(bubble, null);
+        }
+      });
+    });
+
+    // effect: 'fish' (red splatter), 'poo' (splatter already done by launchPoop), or null (blue pop)
+    function leaveMenu(bubble, effect) {
+        stopMenuMusic();
+        bubble.classList.remove('hold');
+        bubble.classList.add(effect ? 'explode' : 'burst');
         welcome.classList.add('implode');
         credits.classList.add('implode');
         labels.forEach(label => label.classList.add('implode'));
-        spawnDroplets(bubble);
+        dividers.forEach(line => line.classList.add('implode'));
+        if (effect === 'fish') spawnBlood(bubble);
+        else if (!effect) spawnDroplets(bubble);
         bubbles.forEach(other => {
           if (other !== bubble) other.classList.add('fade');
         });
@@ -1222,28 +3471,35 @@
         setTimeout(() => {
           home.classList.add('hidden');
           page.className = 'page module-' + bubble.dataset.module;
+          startModuleMusic(bubble.dataset.module);
+          if (bubble.dataset.module === '2') startScene();
           if (bubble.dataset.module === '1') {
             bgVideo.currentTime = 0;
             bgVideo.play().catch(() => {});
+            resetScore();
             floatStartTimer = setTimeout(startFloaters, FLOAT_START_DELAY);
           }
           busy = false;
-        }, 650);
-      });
-    });
+        }, { fish: 1100, poo: 1600 }[effect] || 650); // let any splatter play out before switching pages
+    }
 
     back.addEventListener('click', () => {
       page.className = 'page hidden';
       bgVideo.pause();
+      stopModuleMusic();
       stopFloaters();
+      stopScene();
       home.classList.remove('hidden');
+      startMenuMusic();
       welcome.classList.remove('implode');
       credits.classList.remove('implode');
 
       // reset the bubbles so the intro animation plays again
       labels.forEach(label => label.classList.remove('implode'));
-      [...bubbles, ...labels].forEach(el => {
-        el.classList.remove('burst', 'fade');
+      fish.classList.remove('wiggle');
+      patient.classList.remove('facing-away', 'turn-in', 'turn-out');
+      [...bubbles, ...labels, ...dividers].forEach(el => {
+        el.classList.remove('burst', 'fade', 'hold', 'explode', 'turned', 'implode');
         el.style.animation = 'none';
         void el.offsetWidth;
         el.style.animation = '';
