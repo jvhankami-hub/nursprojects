@@ -195,7 +195,248 @@
 
     /* scenario 2 is in a different hospital room; scenario 1's people, speech and panels are hidden */
     .page.module-2.scenario-2 {
-      background-image: url('images/893c4454fa5ea595bf2faa9f01a22020.jpg');
+      background-image: none;
+    }
+
+    /* opening shot: through the nurse's eyes she looks at the bed, then glances down as she
+       brings her clipboard up. Two full-screen layers: the room, and the clipboard view on top */
+    .s2-room,
+    .s2-pov {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      pointer-events: none;
+    }
+
+    .s2-room {
+      background-image: url('images/scenario2-bg.png');
+      animation: s2-look-down 1.3s cubic-bezier(0.5, 0, 0.3, 1) 1.8s both;
+    }
+
+    .s2-pov {
+      background-image: url('images/scenario2-pov.png');
+      animation: s2-clipboard-up 1.3s cubic-bezier(0.2, 0.8, 0.3, 1) 1.8s both;
+    }
+
+    .page.module-2.scenario-2 .s2-room,
+    .page.module-2.scenario-2 .s2-pov {
+      display: block;
+    }
+
+    /* the room drifts up and blurs a little, like the eyes moving down to the clipboard */
+    @keyframes s2-look-down {
+      from { transform: scale(1) translateY(0); filter: blur(0); }
+      to   { transform: scale(1.12) translateY(-6%); filter: blur(3px); }
+    }
+
+    /* sheets of lined paper on the clipboard. JS sizes and places the board box over the clipboard */
+    .s2-board {
+      display: none;
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .page.module-2.scenario-2 .s2-board {
+      display: block;
+    }
+
+    .s2-sheet {
+      position: absolute;
+      inset: 0;
+      /* a plain white sheet of paper, drawn here rather than from a picture */
+      background: #ffffff;
+      border-radius: 2px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25), 0 8px 18px rgba(0, 0, 0, 0.2);
+      transform-origin: 100% 50%;
+    }
+
+    /* each sheet holds one question. JS sets the board's font size from its width, so
+       everything on the paper is in em and scales with the clipboard */
+    .s2-sheet {
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      padding: 1.1em 1em;
+      font-family: 'Fredoka', sans-serif;
+      color: #1d2b4f;
+      pointer-events: auto;
+    }
+
+    .s2-q-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75em;
+      font-weight: 500;
+      color: #5b6785;
+    }
+
+    .s2-level {
+      padding: 0.15em 0.7em;
+      border-radius: 999px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .s2-level.easy   { background: #1fa557; }
+    .s2-level.medium { background: #f08c00; }
+    .s2-level.hard   { background: #e04444; }
+
+    .s2-q-text {
+      margin: 0.7em 0 0.9em;
+      font-size: 1.05em;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .s2-choices {
+      display: grid;
+      gap: 0.5em;
+    }
+
+    .s2-choice {
+      display: flex;
+      align-items: center;
+      gap: 0.6em;
+      padding: 0.5em 0.7em;
+      border: 2px solid #d5dbe8;
+      border-radius: 0.6em;
+      background: #f7f9fc;
+      font: inherit;
+      font-size: 0.9em;
+      font-weight: 500;
+      color: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.15s, background 0.15s, border-color 0.15s;
+    }
+
+    .s2-choice:hover:not(:disabled) {
+      transform: scale(1.03);
+      border-color: #7bbcff;
+      background: #eef6ff;
+    }
+
+    .s2-choice:disabled {
+      cursor: default;
+    }
+
+    .s2-letter {
+      flex: none;
+      display: grid;
+      place-items: center;
+      width: 1.8em;
+      height: 1.8em;
+      border-radius: 50%;
+      background: #2a78e0;
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .s2-choice.correct { border-color: #3ccf73; background: #eafff0; }
+    .s2-choice.correct .s2-letter { background: #1fa557; }
+    .s2-choice.wrong   { border-color: #ff6b6b; background: #fff0f0; }
+    .s2-choice.wrong .s2-letter { background: #e04444; }
+    .s2-choice.dim     { opacity: 0.45; }
+
+    .s2-feedback {
+      margin-top: 0.8em;
+      font-size: 0.9em;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .s2-feedback.right { color: #1fa557; }
+    .s2-feedback.miss  { color: #e04444; }
+
+    /* last page: the score and what to do next */
+    .s2-results {
+      justify-content: center;
+      align-items: center;
+      gap: 0.5em;
+      text-align: center;
+    }
+
+    .s2-results h2 {
+      margin: 0;
+      font-size: 1.6em;
+    }
+
+    .s2-results-score {
+      font-size: 1.1em;
+      font-weight: 700;
+    }
+
+    .s2-results-score span {
+      font-size: 2.2em;
+      color: #2a78e0;
+    }
+
+    .s2-results p {
+      margin: 0 0 0.6em;
+      font-size: 0.9em;
+      font-weight: 500;
+      line-height: 1.35;
+    }
+
+    .s2-results .s2-choice {
+      justify-content: center;
+      width: 80%;
+      font-weight: 700;
+    }
+
+    /* the first sheet arrives with the clipboard */
+    .s2-sheet.first {
+      animation: sheet-in 0.4s ease-out 2.9s both;
+    }
+
+    @keyframes sheet-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    /* page turn: the view switches to the photo with only the left hand on the board, while
+       the right hand (a separate picture) reaches in, pinches the sheet and pulls it away */
+    .s2-pov-one {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: url('images/scenario2-pov-onehand.png') center / cover no-repeat;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      pointer-events: none;
+    }
+
+    .page.module-2.scenario-2 .s2-pov-one {
+      display: block;
+    }
+
+    .page.module-2.scenario-2.s2-one-hand .s2-pov-one {
+      opacity: 1;
+    }
+
+    .s2-hand {
+      display: none;
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .page.module-2.scenario-2.s2-one-hand .s2-hand {
+      display: block;
+    }
+
+    /* the clipboard view rises from below and fades in over the room. It starts zoomed in enough
+       that its top edge never shows while it moves */
+    @keyframes s2-clipboard-up {
+      0%   { opacity: 0; transform: translateY(8%) scale(1.18); }
+      70%  { opacity: 1; }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     .page.module-2.scenario-2 :is(.scene-patient, .scene-patient-sitting, .scene-patient-lying,
@@ -867,6 +1108,17 @@
 
     .page.module-1 .skip {
       display: block;
+    }
+
+    /* TEMPORARY: module 2 skip straight to scenario 2, for testing. Remove when done */
+    .page.module-2 .skip-scene {
+      display: block;
+      z-index: 9; /* above the end card too */
+    }
+
+    .page.module-1 .skip-scene,
+    .page.module-2.scenario-2 .skip-scene {
+      display: none;
     }
 
     /* extra .module-1 so this beats the `.page.module-1 .intro` rule further down */
@@ -2122,13 +2374,18 @@
   <div class="page hidden" id="page">
     <video class="bg-video" id="bg-video" src="images/155553-810322535_medium.mp4" muted loop playsinline preload="metadata"></video>
     <div class="float-layer" id="float-layer"></div>
+    <div class="s2-room"></div>
+    <div class="s2-pov"></div>
+    <div class="s2-pov-one"></div>
+    <!-- the paper sheets on the clipboard; JS adds them, top sheet last -->
+    <div class="s2-board" id="s2-board"></div>
+    <img class="s2-hand" id="s2-hand" src="images/hand-pinch.png" alt="">
     <img class="scene-patient" id="scene-patient" src="images/patient.png" alt="Patient in a hospital gown beside the bed">
     <img class="scene-patient-sitting" id="scene-patient-sitting" src="images/patient-sitting.png" alt="Patient sitting upright in a chair">
     <img class="scene-patient-lying" id="scene-patient-lying" src="images/patient-lying.png" alt="Patient lying on the bed">
     <img class="scene-patient-down" id="scene-patient-down" src="images/patient-down.png" alt="Patient collapsed on the floor">
     <img class="scene-nurse" id="scene-nurse" src="images/nurse.png" alt="Nurse standing by the bed">
-    <img class="scene-nurse-giving" id="scene-nurse-giving" src="images/nurse-giving.png" alt="Nurse handing the patient a pill bottle">
-    <button class="sphere back" id="back" aria-label="Go back">
+    <img class="scene-nurse-giving" id="scene-nurse-giving" src="images/nurse-giving.png" alt="Nurse handing the patient a pill bottle">    <button class="sphere back" id="back" aria-label="Go back">
       <svg viewBox="0 0 24 24" fill="none" stroke="#062a6b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
         <path d="M19 12H5M12 19l-7-7 7-7" />
       </svg>
@@ -2176,7 +2433,8 @@
     </div>
 
     <button class="skip" id="skip">Skip ▸</button>
-
+    <!-- TEMPORARY: skips to scenario 2 in module 2, for testing. Remove when done -->
+    <button class="skip skip-scene" id="skip-scene">Skip to game 2 ▸</button>
     <div class="score" id="score">
       <div class="score-points" id="score-points">0 pts</div>
       <div class="score-goal" id="score-goal"></div>
@@ -2810,6 +3068,11 @@
       { el: document.getElementById('scene-patient-down'), centerX: 820, floorY: 925, w: 470, h: 270 },
     ];
 
+    // the paper's spot on the clipboard, the same 490 x 720 shape as the lined paper picture
+    const BOARD = { x: 698, y: 215, w: 459, h: 675 };
+    const board = document.getElementById('s2-board');
+    let sceneMap = null; // how the scene pictures are scaled and offset on screen right now
+
     // the background uses `cover`, so work out how the image is scaled and cropped,
     // then map each spot onto the screen so things stay put at any window size
     function placeSceneItems() {
@@ -2824,6 +3087,15 @@
         item.el.style.left = offX + (item.centerX - item.w / 2) * s + 'px';
         item.el.style.top = offY + (item.floorY - item.h) * s + 'px';
       });
+
+      // scenario 2's paper goes on the clipboard, between the clip and the bottom and clear of
+      // the thumbs (the clipboard picture is the same 1672x941 size as the scene)
+      sceneMap = { s, offX, offY };
+      board.style.left = offX + BOARD.x * s + 'px';
+      board.style.top = offY + BOARD.y * s + 'px';
+      board.style.width = BOARD.w * s + 'px';
+      board.style.height = BOARD.h * s + 'px';
+      board.style.fontSize = BOARD.w * s / 21 + 'px'; // the paper's text scales with it
 
       // each speech bubble's tail sits just above and right of the speaker's head
       const patientItem = SCENE_ITEMS[page.classList.contains('patient-lying') ? 3
@@ -3094,7 +3366,183 @@
       page.classList.add('scenario-2');
       fadeMusic(module2Music, 0, 500, () => module2Music.pause());
       startModuleMusic('scenario2');
+      resetSheets();
     }
+
+    // ---- scenario 2 clipboard pages ----
+    // one sheet of paper per question, then a results sheet; the next sheet waits underneath.
+    // `answer` is the index of the correct choice (0 = A)
+    const S2_QUESTIONS = [
+      { level: 'Easy', question: 'A patient is experiencing frequent vomiting. What is the medical term for excessive vomiting?',
+        choices: ['Dyspepsia', 'Hyperemesis', 'Eructation', 'Regurgitation'], answer: 1 },
+      { level: 'Easy', question: 'A patient is experiencing a nosebleed. What is the medical term?',
+        choices: ['Rhinorrhea', 'Rhinitis', 'Epistaxis', 'Anosmia'], answer: 2 },
+      { level: 'Easy', question: 'A patient has inflammation of the liver. What is the correct medical term?',
+        choices: ['Hepatitis', 'Cirrhosis', 'Hepatoma', 'Hepatomegaly'], answer: 0 },
+      { level: 'Medium', question: 'A patient has difficulty breathing when lying flat but feels better when sitting upright. What is this called?',
+        choices: ['Orthopnea', 'Hypopnea', 'Hyperpnea', 'Eupnea'], answer: 0 },
+      { level: 'Medium', question: 'A patient has yellow discoloration of the skin and eyes. Which medical term describes this condition?',
+        choices: ['Cyanosis', 'Jaundice', 'Ascites', 'Cachexia'], answer: 1 },
+      { level: 'Medium', question: 'A patient has an accumulation of fluid in the lungs, making breathing difficult. What is the medical term?',
+        choices: ['Pulmonary fibrosis', 'Pulmonary embolism', 'Pulmonary edema', 'Atelectasis'], answer: 2 },
+      { level: 'Medium', question: 'A patient has gallstones forming in the gallbladder. What is the medical term for this condition?',
+        choices: ['Cholecystalgia', 'Cholelithiasis', 'Cholangitis', 'Choledocholithiasis'], answer: 1 },
+      { level: 'Hard', question: 'A patient has an abnormal twisting of the intestine, which can cause a bowel obstruction. What is this condition called?',
+        choices: ['Intussusception', 'Ileus', 'Volvulus', 'Diverticulosis'], answer: 2 },
+      { level: 'Hard', question: 'A patient has a condition where the alveoli collapse, preventing normal expansion of part of the lung. What is the medical term?',
+        choices: ['Bronchiectasis', 'Atelectasis', 'Emphysema', 'Pneumothorax'], answer: 1 },
+      { level: 'Hard', question: 'A patient has enlarged, swollen veins in the lower esophagus that may cause serious bleeding if they rupture. What is this condition called?',
+        choices: ['Esophageal atresia', 'Esophageal varices', 'Peptic ulcer disease', 'GERD'], answer: 1 },
+    ];
+    const S2_PAGES = S2_QUESTIONS.length + 1; // the questions, then the results
+    const FLIP_AFTER_RIGHT = 1400; // time to see the answer before the page turns
+    const FLIP_AFTER_WRONG = 2600; // longer after a wrong answer, to read the right one
+    let s2Score = 0;
+    const hand = document.getElementById('s2-hand');
+    const HAND = { w: 800, h: 611, pinchX: 0.05, pinchY: 0.32 }; // size, and where the fingers pinch
+    let sheetIndex = 0;
+    let turning = false;
+    let sheetSession = 0; // bumped on reset so a page turn still running from before does nothing
+
+    // sheet `i` is question i, or the results after the last question.
+    // `first`: the opening sheet, which animates in with the clipboard
+    function makeSheet(i, first) {
+      const sheet = document.createElement('div');
+      sheet.className = 's2-sheet' + (first ? ' first' : '');
+      if (i >= S2_QUESTIONS.length) {
+        fillResults(sheet);
+        return sheet;
+      }
+      const q = S2_QUESTIONS[i];
+      sheet.innerHTML = `
+        <div class="s2-q-meta">
+          <span>Question ${i + 1} of ${S2_QUESTIONS.length}</span>
+          <span class="s2-level ${q.level.toLowerCase()}">${q.level}</span>
+        </div>
+        <div class="s2-q-text"></div>
+        <div class="s2-choices"></div>
+        <div class="s2-feedback"></div>`;
+      sheet.querySelector('.s2-q-text').textContent = q.question;
+      const buttons = q.choices.map((choice, c) => {
+        const btn = document.createElement('button');
+        btn.className = 's2-choice';
+        btn.innerHTML = `<span class="s2-letter">${'ABCD'[c]}</span><span></span>`;
+        btn.lastChild.textContent = choice;
+        btn.addEventListener('click', () => answerS2(q, c, buttons, sheet));
+        sheet.querySelector('.s2-choices').appendChild(btn);
+        return btn;
+      });
+      return sheet;
+    }
+
+    // one try per question: mark it, then the hand turns to the next page
+    function answerS2(q, c, buttons, sheet) {
+      buttons.forEach((b, j) => {
+        b.disabled = true;
+        if (j === q.answer) b.classList.add('correct');
+        else if (j === c) b.classList.add('wrong');
+        else b.classList.add('dim');
+      });
+      const feedback = sheet.querySelector('.s2-feedback');
+      const right = c === q.answer;
+      if (right) {
+        s2Score++;
+        playSound(correctSound, CORRECT_SOUND_START);
+        feedback.textContent = 'Correct!';
+      } else {
+        playSound(wrongSound);
+        feedback.textContent = `Not quite. The answer is ${'ABCD'[q.answer]}. ${q.choices[q.answer]}.`;
+      }
+      feedback.classList.add(right ? 'right' : 'miss');
+      const session = sheetSession;
+      setTimeout(() => {
+        if (session === sheetSession) turnPage();
+      }, right ? FLIP_AFTER_RIGHT : FLIP_AFTER_WRONG);
+    }
+
+    // filled in as the page comes up, so the score is the final one
+    function fillResults(sheet) {
+      sheet.classList.add('s2-results');
+      const n = S2_QUESTIONS.length;
+      const message = s2Score === n ? 'Perfect score, amazing work!'
+        : s2Score >= n * 0.7 ? 'Great job! You really know your medical terms.'
+        : s2Score >= n * 0.4 ? 'Good effort! Review the ones you missed and try again.'
+        : 'Keep practising, you will get there!';
+      sheet.innerHTML = `
+        <h2>All done!</h2>
+        <div class="s2-results-score"><span>${s2Score}</span> / ${n}</div>
+        <p>${message}</p>
+        <button class="s2-choice" data-action="replay">Try again</button>
+        <button class="s2-choice" data-action="menu">Main menu</button>`;
+      sheet.querySelector('[data-action="replay"]').addEventListener('click', () => resetSheets(false));
+      sheet.querySelector('[data-action="menu"]').addEventListener('click', () => back.click());
+    }
+
+    // `intro`: the first sheet waits for the clipboard to come up before appearing
+    function resetSheets(intro = true) {
+      sheetSession++;
+      s2Score = 0;
+      board.innerHTML = '';
+      board.appendChild(makeSheet(0, intro));
+      sheetIndex = 0;
+      turning = false;
+      page.classList.remove('s2-one-hand');
+      hand.getAnimations().forEach(a => a.cancel());
+    }
+
+    // the right hand lets go of the board, reaches in from the bottom right, pinches the top
+    // sheet's edge and pulls it off to the right, leaving the next sheet showing
+    function turnPage() {
+      if (turning || sheetIndex + 1 >= S2_PAGES || !sceneMap) return;
+      turning = true;
+      const session = sheetSession;
+      const { s, offX, offY } = sceneMap;
+      const top = board.lastElementChild;
+      board.insertBefore(makeSheet(sheetIndex + 1, false), top);
+
+      // hand placed so its pinch lands on the middle of the sheet's right edge
+      const w = HAND.w * s;
+      const h = HAND.h * s;
+      const pinchAtX = offX + (BOARD.x + BOARD.w - 10) * s;
+      const pinchAtY = offY + (BOARD.y + BOARD.h * 0.5) * s;
+      hand.style.width = w + 'px';
+      hand.style.height = h + 'px';
+      const hx = pinchAtX - w * HAND.pinchX;
+      const hy = pinchAtY - h * HAND.pinchY;
+      const away = window.innerWidth - (offX + BOARD.x * s) + 60; // far enough to clear the screen
+
+      // `both` keeps the hand at its off-screen start during the delay, instead of showing at
+      // the top left of the screen before it moves
+      const start = `translate(${hx + w * 0.9}px, ${hy + h * 0.7}px)`;
+      hand.style.transform = start;
+      const reach = hand.animate([
+        { transform: start },
+        { transform: `translate(${hx}px, ${hy}px)` },
+      ], { duration: 500, delay: 150, easing: 'cubic-bezier(0.2, 0.8, 0.3, 1)', fill: 'both' });
+      page.classList.add('s2-one-hand');
+
+      reach.finished.then(() => {
+        const pull = { duration: 650, delay: 120, easing: 'cubic-bezier(0.5, 0, 0.75, 0.4)', fill: 'forwards' };
+        hand.animate([
+          { transform: `translate(${hx}px, ${hy}px)` },
+          { transform: `translate(${hx + away}px, ${hy - 50 * s}px)` },
+        ], pull);
+        return top.animate([
+          { transform: 'translate(0, 0) rotate(0deg)' },
+          { transform: `translate(${away}px, ${-50 * s}px) rotate(12deg)` },
+        ], pull).finished;
+      }).then(() => {
+        if (session !== sheetSession) return;
+        top.remove();
+        sheetIndex++;
+        page.classList.remove('s2-one-hand');
+        hand.getAnimations().forEach(a => a.cancel());
+        turning = false;
+      }).catch(() => {}); // cancelled because the player left game 2
+    }
+
+    // TEMPORARY: testing shortcut straight to scenario 2. Remove along with the button
+    document.getElementById('skip-scene').addEventListener('click', startScenario2);
 
     function resetChoices() {
       nurseChoices.classList.remove('show', 'leaving');
