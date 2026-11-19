@@ -7,7 +7,7 @@
   <link rel="preload" href="images/module2-bg.png" as="image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Grandstander:wght@500;700&display=swap" rel="stylesheet">
   <style>
     html, body {
       margin: 0;
@@ -191,6 +191,211 @@
       background-position: center;
       background-size: cover;
       background-repeat: no-repeat;
+    }
+
+    .page.module-3 {
+      background-color: #07142f;
+      background-image: url('images/3d041b80-86ae-4f79-b4b8-f27a5239bebe.png');
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      animation: module3-enter 1.1s cubic-bezier(0.2, 0.7, 0.25, 1) both;
+    }
+
+    @keyframes module3-enter {
+      from { opacity: 0; filter: brightness(0.55); transform: scale(1.06); }
+      to   { opacity: 1; filter: brightness(1); transform: scale(1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .page.module-3 {
+        animation-duration: 0.01ms;
+      }
+    }
+
+    .module3-camp-scene {
+      --fire-size: clamp(170px, 32vmin, 300px);
+      --seat-size: clamp(124px, 18vw, 224px);
+      --seat-radius: calc(var(--fire-size) / 2 + var(--seat-size) / 6 + clamp(14px, 2vmin, 28px));
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: none;
+      pointer-events: none;
+    }
+
+    .page.module-3 .module3-camp-scene {
+      display: block;
+    }
+
+    .module3-fire {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 1;
+      width: var(--fire-size);
+      aspect-ratio: 1;
+      transform: translate(-50%, -50%);
+      filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.7));
+    }
+
+    .module3-fire-glow {
+      position: absolute;
+      inset: -85%;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(255, 113, 24, 0.32) 0%, rgba(255, 80, 14, 0.12) 38%, transparent 72%);
+      animation: ember-glow 1.5s ease-in-out infinite alternate;
+    }
+
+    .camp-seat {
+      position: absolute;
+      z-index: 2;
+      width: var(--seat-size);
+      aspect-ratio: 1;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      pointer-events: auto;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .camp-seat:focus-visible {
+      outline: 3px solid #fff3b0;
+      outline-offset: -8px;
+      border-radius: 12px;
+    }
+
+    .camp-seat:hover .camp-seat-log,
+    .camp-seat.occupied .camp-seat-log {
+      filter: brightness(1.2) drop-shadow(0 0 12px rgba(255, 170, 72, 0.7));
+    }
+
+    .camp-seat-log {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100%;
+      height: auto;
+      transform: translate(-50%, -50%);
+      filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.65));
+      transition: filter 0.2s ease;
+      pointer-events: none;
+    }
+
+    .camp-seat.seat-east .camp-seat-log,
+    .camp-seat.seat-west .camp-seat-log {
+      transform: translate(-50%, -50%) rotate(90deg);
+    }
+
+    .camp-seat.seat-north {
+      top: calc(50% - var(--seat-radius));
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .camp-seat.seat-east {
+      top: 50%;
+      left: calc(50% + var(--seat-radius));
+      transform: translate(-50%, -50%);
+    }
+
+    .camp-seat.seat-south {
+      top: calc(50% + var(--seat-radius));
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .camp-seat.seat-west {
+      top: 50%;
+      left: calc(50% - var(--seat-radius));
+      transform: translate(-50%, -50%);
+    }
+
+    .camp-seat-player {
+      position: absolute;
+      top: 6%;
+      left: 50%;
+      display: none;
+      width: 42%;
+      height: 62%;
+      transform: translateX(-50%);
+      filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.75));
+      pointer-events: none;
+    }
+
+    .camp-seat.occupied .camp-seat-player {
+      display: block;
+      animation: player-sit-down 0.4s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+    }
+
+    .camp-seat-player span {
+      position: absolute;
+      display: block;
+      border: 2px solid #18253b;
+    }
+
+    .camp-player-head {
+      top: 0;
+      left: 36%;
+      width: 28%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: #e7ae7b;
+    }
+
+    .camp-player-body {
+      top: 26%;
+      left: 23%;
+      width: 54%;
+      height: 39%;
+      border-radius: 9px 9px 5px 5px;
+      background: var(--player-shirt, #ed7658);
+    }
+
+    .camp-player-arm {
+      top: 34%;
+      width: 20%;
+      height: 30%;
+      border-radius: 999px;
+      background: #e7ae7b;
+    }
+
+    .camp-player-arm.left {
+      left: 8%;
+      transform: rotate(28deg);
+    }
+
+    .camp-player-arm.right {
+      right: 8%;
+      transform: rotate(-28deg);
+    }
+
+    .camp-player-leg {
+      top: 58%;
+      width: 42%;
+      height: 20%;
+      border-radius: 5px 5px 999px 999px;
+      background: #25324a;
+    }
+
+    .camp-player-leg.left {
+      left: 12%;
+      transform: rotate(12deg);
+    }
+
+    .camp-player-leg.right {
+      right: 12%;
+      transform: rotate(-12deg);
+    }
+
+    .seat-east { --player-shirt: #e6a543; }
+    .seat-south { --player-shirt: #66b9a2; }
+    .seat-west { --player-shirt: #9c8bd5; }
+
+    @keyframes player-sit-down {
+      from { opacity: 0; transform: translate(-50%, -35%); }
+      to   { opacity: 1; transform: translate(-50%, 0); }
     }
 
     /* scenario 2 is in a different hospital room; scenario 1's people, speech and panels are hidden */
@@ -652,7 +857,7 @@
       z-index: 1;
       padding: 0 14%;
       text-align: center;
-      font-family: 'Fredoka', sans-serif;
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
       font-size: clamp(18px, 2.4vw, 30px);
       font-weight: 700;
       line-height: 1.2;
@@ -699,7 +904,7 @@
         0 0 18px rgba(140, 240, 255, 0.6),
         0 8px 16px rgba(0, 0, 0, 0.35),
         inset 0 -4px 8px rgba(60, 140, 210, 0.25);
-      font-family: 'Fredoka', sans-serif;
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
       font-size: clamp(15px, 1.6vw, 20px);
       font-weight: 500;
       color: #062a6b;
@@ -747,7 +952,7 @@
       align-items: center;
       gap: 14px;
       text-align: center;
-      font-family: 'Fredoka', sans-serif;
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
       font-size: clamp(20px, 2.4vw, 30px);
       font-weight: 700;
       color: #ffffff;
@@ -794,7 +999,7 @@
         0 0 20px rgba(74, 158, 255, 0.45),
         0 10px 18px rgba(0, 0, 0, 0.5),
         inset 0 3px 6px rgba(255, 255, 255, 0.4);
-      font-family: 'Fredoka', sans-serif;
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
       color: #ffffff;
       text-align: center;
       animation: pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
@@ -926,7 +1131,7 @@
         0 24px 40px rgba(0, 0, 0, 0.55),
         inset 0 -14px 30px rgba(2, 20, 70, 0.5),
         inset 0 6px 14px rgba(255, 255, 255, 0.45);
-      font-family: 'Fredoka', sans-serif;
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
       color: #ffffff;
       text-align: center;
       animation: prize-pop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
@@ -1035,7 +1240,7 @@
         0 8px 14px rgba(0, 0, 0, 0.4),
         inset 0 -4px 8px rgba(160, 90, 0, 0.3),
         inset 0 3px 6px rgba(255, 255, 255, 0.7);
-      font-family: 'Fredoka', sans-serif;
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
       font-size: 19px;
       font-weight: 700;
       color: #5a3500;
@@ -1095,7 +1300,7 @@
         0 0 20px rgba(74, 158, 255, 0.45),
         0 10px 18px rgba(0, 0, 0, 0.6),
         inset 0 3px 6px rgba(255, 255, 255, 0.5);
-      font-family: 'Fredoka', sans-serif;
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
       font-size: 18px;
       font-weight: 700;
       color: #ffffff;
@@ -1176,7 +1381,7 @@
         0 14px 26px rgba(0, 0, 0, 0.5),
         inset 0 -10px 22px rgba(2, 20, 70, 0.45),
         inset 0 4px 10px rgba(255, 255, 255, 0.45);
-      font-family: 'Fredoka', sans-serif;
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
       color: #ffffff;
       text-align: center;
       cursor: pointer;
@@ -1269,7 +1474,7 @@
       border-radius: 24px;
       background: #ffffff;
       box-shadow: 0 10px 22px rgba(0, 0, 0, 0.4);
-      font-family: 'Fredoka', sans-serif;
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
       color: #062a6b;
       transform-origin: 0 100%;
     }
@@ -1335,7 +1540,7 @@
       border-radius: 28px;
       background: rgba(6, 32, 90, 0.85);
       box-shadow: 0 0 24px rgba(74, 158, 255, 0.45), 0 14px 26px rgba(0, 0, 0, 0.5);
-      font-family: 'Fredoka', sans-serif;
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
       color: #ffffff;
       text-align: center;
     }
@@ -1451,7 +1656,7 @@
       grid-area: 1 / 1;
       max-width: 900px;
       text-align: center;
-      font-family: 'Fredoka', sans-serif;
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
       font-size: clamp(32px, 5.5vw, 68px);
       font-weight: 700;
       line-height: 1.2;
@@ -1500,8 +1705,8 @@
       right: 0;
       padding: 0 16px;
       text-align: center;
-      font-family: 'Fredoka', sans-serif;
-      animation: pop-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
+      animation: welcome-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
     }
 
     /* group credits in the bottom left, styled like the header text */
@@ -1509,10 +1714,20 @@
       position: absolute;
       left: 24px;
       bottom: 24px;
-      font-family: 'Fredoka', sans-serif;
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
       color: #ffffff;
       line-height: 1.4;
-      animation: pop-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+      animation: credits-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+    }
+
+    @keyframes welcome-in {
+      from { opacity: 0; transform: translateY(-70px) scale(0.85); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes credits-in {
+      from { opacity: 0; transform: translate(-80px, 50px) scale(0.85); }
+      to   { opacity: 1; transform: translate(0, 0) scale(1); }
     }
 
     .credits-inner {
@@ -1696,10 +1911,205 @@
         inset 4px 4px 10px rgba(255, 255, 255, 0.45);
     }
 
+    .bubble.campfire-bubble {
+      overflow: visible;
+      border-radius: 0;
+      background: none;
+      box-shadow: none;
+    }
+
+    .bubble.campfire-bubble::before,
+    .bubble.campfire-bubble::after {
+      content: none;
+    }
+
+    .bubble.campfire-bubble:not(.burst):not(.fade):not(.hold):not(.explode):hover {
+      box-shadow: none;
+      filter: brightness(1.12);
+    }
+
+    .campfire-art {
+      position: absolute;
+      inset: 12% 9% 9%;
+      display: block;
+      filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.45));
+      transform-origin: 50% 90%;
+    }
+
+    .campfire-embers {
+      position: absolute;
+      left: 18%;
+      right: 18%;
+      bottom: 8%;
+      height: 23%;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(255, 100, 8, 0.85) 0%, rgba(196, 48, 8, 0.5) 42%, transparent 72%);
+      animation: ember-glow 1.5s ease-in-out infinite alternate;
+    }
+
+    .campfire-flame {
+      position: absolute;
+      bottom: 20%;
+      z-index: 2;
+      display: block;
+      border-radius: 55% 45% 50% 50% / 70% 70% 30% 30%;
+      transform-origin: 50% 100%;
+      animation: flame-flicker 0.75s ease-in-out infinite alternate;
+    }
+
+    .campfire-flame.outer {
+      left: 23%;
+      width: 54%;
+      height: 62%;
+      background: linear-gradient(160deg, #fff76a 0%, #ffb31a 38%, #f04b12 78%, #b51e16 100%);
+      box-shadow: 0 0 24px rgba(255, 92, 12, 0.8);
+    }
+
+    .campfire-flame.middle {
+      left: 32%;
+      width: 36%;
+      height: 48%;
+      background: linear-gradient(160deg, #fffca0 0%, #ffe34d 40%, #ff821a 100%);
+      animation-delay: -0.3s;
+    }
+
+    .campfire-flame.inner {
+      left: 42%;
+      width: 18%;
+      height: 33%;
+      background: linear-gradient(180deg, #ffffff 0%, #fff8ac 46%, #ffcf39 100%);
+      animation-delay: -0.5s;
+    }
+
+    .campfire-log {
+      position: absolute;
+      z-index: 3;
+      width: 76%;
+      height: auto;
+      pointer-events: none;
+      filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.45));
+    }
+
+    .campfire-log.horizontal-back {
+      left: 12%;
+      bottom: 22%;
+      transform: rotate(-4deg) scale(0.86);
+    }
+
+    .campfire-log.horizontal-front {
+      left: 12%;
+      bottom: 9%;
+      transform: rotate(4deg) scale(0.86);
+    }
+
+    .campfire-log.cross-left,
+    .campfire-log.cross-right {
+      width: 60%;
+      bottom: 25%;
+      transform: rotate(90deg) scale(0.86);
+    }
+
+    .campfire-log.cross-left {
+      left: -3%;
+    }
+
+    .campfire-log.cross-right {
+      left: 43%;
+    }
+
+    .campfire-logo-log {
+      position: absolute;
+      z-index: 3;
+      display: block;
+      box-sizing: border-box;
+      height: 13%;
+      border: 2px solid #482719;
+      border-radius: 999px;
+      background:
+        linear-gradient(180deg, rgba(255, 207, 142, 0.38), transparent 34%, rgba(47, 24, 18, 0.45) 100%),
+        repeating-linear-gradient(0deg, transparent 0 5px, rgba(73, 35, 22, 0.36) 5px 7px, transparent 7px 11px),
+        linear-gradient(180deg, #c9824a 0%, #99592f 48%, #63381f 100%);
+      box-shadow: inset 0 2px 3px rgba(255, 221, 164, 0.45), 0 3px 4px rgba(0, 0, 0, 0.55);
+      pointer-events: none;
+    }
+
+    .campfire-logo-log::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 2%;
+      width: 15%;
+      height: calc(100% - 4px);
+      border: 2px solid #482719;
+      border-radius: 50%;
+      background: radial-gradient(circle, #d79a5e 0 25%, #a46136 30% 52%, #63381f 58% 100%);
+      transform: translateY(-50%);
+    }
+
+    .campfire-logo-log::after {
+      content: "";
+      position: absolute;
+      top: 28%;
+      left: 22%;
+      right: 12%;
+      height: 2px;
+      background: rgba(255, 220, 163, 0.48);
+      box-shadow: 0 6px rgba(52, 27, 19, 0.45);
+    }
+
+    .campfire-logo-log.horizontal-back {
+      left: 12%;
+      bottom: 22%;
+      width: 76%;
+      transform: rotate(-4deg) scale(0.86);
+    }
+
+    .campfire-logo-log.horizontal-front {
+      left: 12%;
+      bottom: 9%;
+      width: 76%;
+      transform: rotate(4deg) scale(0.86);
+    }
+
+    .campfire-logo-log.cross-left,
+    .campfire-logo-log.cross-right {
+      bottom: 25%;
+      width: 60%;
+      transform: rotate(90deg) scale(0.86);
+    }
+
+    .campfire-logo-log.cross-left { left: -3%; }
+    .campfire-logo-log.cross-right { left: 43%; }
+
+    .campfire-bubble .campfire-stones {
+      display: none;
+    }
+
+    .campfire-stones {
+      position: absolute;
+      z-index: 4;
+      left: 11%;
+      right: 11%;
+      bottom: 5%;
+      height: 13%;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, transparent 40%, rgba(31, 40, 48, 0.95) 43%, #75808a 56%, #343f49 72%, transparent 75%);
+    }
+
+    @keyframes flame-flicker {
+      from { transform: rotate(-4deg) scaleX(0.94) scaleY(0.96); }
+      to   { transform: rotate(4deg) scaleX(1.04) scaleY(1.06); }
+    }
+
+    @keyframes ember-glow {
+      from { opacity: 0.65; transform: scale(0.94); }
+      to   { opacity: 1; transform: scale(1.06); }
+    }
+
     /* the screen is split into three equal columns; each bubble sits in the middle of its column */
-    .bubble.left   { --x: -33.333vw; animation-delay: 0s,    0.9s, 2s; }
-    .bubble.middle { --x: 0vw;       animation-delay: 0.15s, 0.9s, 2.4s; }
-    .bubble.right  { --x: 33.333vw;  animation-delay: 0.3s,  0.9s, 2.8s; }
+    .bubble.left   { --x: -33.333vw; --start-x: -42vw; --start-y: 18vh; animation-delay: 0s,    0.9s, 2s; }
+    .bubble.middle { --x: 0vw;       --start-x: 0vw;    --start-y: -42vh; animation-delay: 0.15s, 0.9s, 2.4s; }
+    .bubble.right  { --x: 33.333vw;  --start-x: 42vw;  --start-y: 18vh; animation-delay: 0.3s,  0.9s, 2.8s; }
 
     /* glowing lines between the three columns; they grow in once the bubbles have spread out */
     .divider {
@@ -1738,7 +2148,7 @@
     }
 
     .number {
-      font-family: 'Fredoka', sans-serif;
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
       font-size: calc(var(--size) * 0.55);
       font-weight: 700;
       line-height: 1;
@@ -1980,7 +2390,7 @@
       width: var(--size);
       margin-left: calc(var(--size) / -2);
       text-align: center;
-      font-family: 'Fredoka', sans-serif;
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
       font-size: clamp(14px, 1.8vw, 22px);
       font-weight: 500;
       color: #ffffff;
@@ -2027,8 +2437,8 @@
     }
 
     @keyframes pop {
-      0%   { transform: translateX(0) scale(0); }
-      100% { transform: translateX(0) scale(1); }
+      0%   { transform: translate(var(--start-x), var(--start-y)) scale(0); }
+      100% { transform: translate(0, 0) scale(1); }
     }
 
     @keyframes spread {
@@ -2049,6 +2459,51 @@
 
     @keyframes fade {
       to { transform: translateX(var(--x)) scale(0.8); opacity: 0; }
+    }
+
+    .bubble.campfire-bubble.burst {
+      animation: campfire-collapse 0.58s cubic-bezier(0.55, 0, 0.8, 0.25) forwards;
+    }
+
+    .campfire-bubble.burst .campfire-flame {
+      animation: flame-out 0.24s ease-in forwards;
+    }
+
+    .campfire-bubble.burst .campfire-flame.middle { animation-delay: 0.04s; }
+    .campfire-bubble.burst .campfire-flame.inner { animation-delay: 0.08s; }
+
+    .campfire-bubble.burst .campfire-embers {
+      animation: ember-out 0.25s ease-in forwards;
+    }
+
+    .campfire-bubble.burst .campfire-logo-log {
+      animation: wood-in 0.38s ease-in 0.16s forwards;
+    }
+
+    .campfire-bubble.burst .campfire-stones {
+      animation: stones-in 0.34s ease-in 0.12s forwards;
+    }
+
+    @keyframes campfire-collapse {
+      0%   { transform: translateX(var(--x)) scale(1); opacity: 1; }
+      30%  { transform: translateX(var(--x)) scale(0.94); opacity: 1; }
+      100% { transform: translateX(var(--x)) scale(0); opacity: 0; }
+    }
+
+    @keyframes flame-out {
+      to { transform: scale(0.15, 0); opacity: 0; }
+    }
+
+    @keyframes ember-out {
+      to { transform: scale(0.2); opacity: 0; }
+    }
+
+    @keyframes wood-in {
+      to { transform: translateY(0) rotate(0) scaleX(0.2); opacity: 0; }
+    }
+
+    @keyframes stones-in {
+      to { transform: scale(0.35); opacity: 0; }
     }
 
     /* droplets that fly out when a bubble bursts */
@@ -2094,7 +2549,7 @@
       left: 24px;
       width: 64px;
       text-align: center;
-      font-family: 'Fredoka', sans-serif;
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
       font-size: 16px;
       font-weight: 700;
       color: #ffffff;
@@ -2283,7 +2738,7 @@
 
             <!-- swearing: censor bar over the mouth -->
             <rect x="79" y="76" width="42" height="15" rx="4" fill="#161616" stroke="#ffffff" stroke-width="1.5" />
-            <text x="100" y="87.5" text-anchor="middle" font-family="Fredoka, sans-serif" font-size="11.5" font-weight="700" fill="#ff5a5a">#@$%&amp;!</text>
+            <text x="100" y="87.5" text-anchor="middle" font-family="Grandstander, sans-serif" font-size="11.5" font-weight="700" fill="#ff5a5a">#@$%&amp;!</text>
 
             <!-- grey moustache -->
             <path d="M86 75 Q93 69 100 73 Q107 69 114 75 Q107 79 100 76 Q93 79 86 75 Z" fill="#e6e6e6" stroke="#062a6b" stroke-width="2" stroke-linejoin="round" />
@@ -2338,7 +2793,19 @@
       </svg>
       <span class="number">2</span>
     </div>
-    <div class="sphere bubble right" data-module="3"><span class="number">3</span></div>
+    <div class="sphere bubble right campfire-bubble" data-module="3" aria-label="Module 3: Cultural Safety in Nursing">
+      <span class="campfire-art" aria-hidden="true">
+        <span class="campfire-embers"></span>
+        <span class="campfire-flame outer"></span>
+        <span class="campfire-flame middle"></span>
+        <span class="campfire-flame inner"></span>
+        <span class="campfire-logo-log horizontal-back"></span>
+        <span class="campfire-logo-log horizontal-front"></span>
+        <span class="campfire-logo-log cross-left"></span>
+        <span class="campfire-logo-log cross-right"></span>
+        <span class="campfire-stones"></span>
+      </span>
+    </div>
     <div class="divider one"></div>
     <div class="divider two"></div>
     <div class="label left">Understanding Culture &amp; Diversity</div>
@@ -2374,6 +2841,38 @@
   <div class="page hidden" id="page">
     <video class="bg-video" id="bg-video" src="images/155553-810322535_medium.mp4" muted loop playsinline preload="metadata"></video>
     <div class="float-layer" id="float-layer"></div>
+    <div class="module3-camp-scene" role="group" aria-label="Campfire seating area">
+      <div class="module3-fire" aria-hidden="true">
+        <span class="module3-fire-glow"></span>
+        <span class="campfire-art">
+          <span class="campfire-embers"></span>
+          <span class="campfire-flame outer"></span>
+          <span class="campfire-flame middle"></span>
+          <span class="campfire-flame inner"></span>
+          <img class="campfire-log horizontal-back" src="images/76f99196-3748-4c1c-8295-107c1f53b00a.png" alt="">
+          <img class="campfire-log horizontal-front" src="images/76f99196-3748-4c1c-8295-107c1f53b00a.png" alt="">
+          <img class="campfire-log cross-left" src="images/76f99196-3748-4c1c-8295-107c1f53b00a.png" alt="">
+          <img class="campfire-log cross-right" src="images/76f99196-3748-4c1c-8295-107c1f53b00a.png" alt="">
+          <span class="campfire-stones"></span>
+        </span>
+      </div>
+      <button class="camp-seat seat-north" type="button" aria-label="Empty campfire seat 1. Activate to sit down." aria-pressed="false">
+        <img class="camp-seat-log" src="images/76f99196-3748-4c1c-8295-107c1f53b00a.png" alt="">
+        <span class="camp-seat-player" aria-hidden="true"><span class="camp-player-head"></span><span class="camp-player-body"></span><span class="camp-player-arm left"></span><span class="camp-player-arm right"></span><span class="camp-player-leg left"></span><span class="camp-player-leg right"></span></span>
+      </button>
+      <button class="camp-seat seat-east" type="button" aria-label="Empty campfire seat 2. Activate to sit down." aria-pressed="false">
+        <img class="camp-seat-log" src="images/76f99196-3748-4c1c-8295-107c1f53b00a.png" alt="">
+        <span class="camp-seat-player" aria-hidden="true"><span class="camp-player-head"></span><span class="camp-player-body"></span><span class="camp-player-arm left"></span><span class="camp-player-arm right"></span><span class="camp-player-leg left"></span><span class="camp-player-leg right"></span></span>
+      </button>
+      <button class="camp-seat seat-south" type="button" aria-label="Empty campfire seat 3. Activate to sit down." aria-pressed="false">
+        <img class="camp-seat-log" src="images/76f99196-3748-4c1c-8295-107c1f53b00a.png" alt="">
+        <span class="camp-seat-player" aria-hidden="true"><span class="camp-player-head"></span><span class="camp-player-body"></span><span class="camp-player-arm left"></span><span class="camp-player-arm right"></span><span class="camp-player-leg left"></span><span class="camp-player-leg right"></span></span>
+      </button>
+      <button class="camp-seat seat-west" type="button" aria-label="Empty campfire seat 4. Activate to sit down." aria-pressed="false">
+        <img class="camp-seat-log" src="images/76f99196-3748-4c1c-8295-107c1f53b00a.png" alt="">
+        <span class="camp-seat-player" aria-hidden="true"><span class="camp-player-head"></span><span class="camp-player-body"></span><span class="camp-player-arm left"></span><span class="camp-player-arm right"></span><span class="camp-player-leg left"></span><span class="camp-player-leg right"></span></span>
+      </button>
+    </div>
     <div class="s2-room"></div>
     <div class="s2-pov"></div>
     <div class="s2-pov-one"></div>
@@ -3911,7 +4410,7 @@
         labels.forEach(label => label.classList.add('implode'));
         dividers.forEach(line => line.classList.add('implode'));
         if (effect === 'fish') spawnBlood(bubble);
-        else if (!effect) spawnDroplets(bubble);
+        else if (!effect && !bubble.classList.contains('campfire-bubble')) spawnDroplets(bubble);
         bubbles.forEach(other => {
           if (other !== bubble) other.classList.add('fade');
         });
@@ -3931,8 +4430,27 @@
         }, { fish: 1100, poo: 1600 }[effect] || 650); // let any splatter play out before switching pages
     }
 
+    const campSeats = [...page.querySelectorAll('.camp-seat')];
+
+    campSeats.forEach((seat, index) => {
+      seat.addEventListener('click', () => {
+        const occupied = seat.classList.toggle('occupied');
+        seat.setAttribute('aria-pressed', String(occupied));
+        seat.setAttribute('aria-label', `Campfire seat ${index + 1}, ${occupied ? 'occupied. Activate to stand up.' : 'empty. Activate to sit down.'}`);
+      });
+    });
+
+    function resetCampSeats() {
+      campSeats.forEach((seat, index) => {
+        seat.classList.remove('occupied');
+        seat.setAttribute('aria-pressed', 'false');
+        seat.setAttribute('aria-label', `Empty campfire seat ${index + 1}. Activate to sit down.`);
+      });
+    }
+
     back.addEventListener('click', () => {
       page.className = 'page hidden';
+      resetCampSeats();
       bgVideo.pause();
       stopModuleMusic();
       stopFloaters();
