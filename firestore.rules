@@ -1,0 +1,82 @@
+rules_version = '2';
+
+// Paste this into Firebase Console > Firestore Database > Rules, then click Publish.
+//
+// Matches js/rooms.js. The only data is:
+//   rooms/{roomId}/players/{uid}  ->  { name, spot, joinedAt, lastSeen }
+// and the only operations are:
+//   list the players in a room   (getDocs / onSnapshot on the players collection)
+//   join     = setDoc on your own doc   (create, or overwrite a leftover doc of yours)
+//   heartbeat = updateDoc of lastSeen only
+//   leave    = deleteDoc on your own doc
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- helpers ----
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Only rooms the site actually uses. Add a name here when a new room is created.
+    //   campfire          module 3
+    //   _connection-test  firebase-test.html
+    function knownRoom(roomId) {
+      return roomId in ['campfire', '_connection-test'];
+    }
+
+    // A complete, valid player document as written by joinRoom():
+    // exactly these 4 fields, a trimmed 1-20 character name, a spot in [0, 1),
+    // and both timestamps set by the server (serverTimestamp() == request.time).
+    function isValidJoin(data) {
+      return data.keys().hasOnly(['name', 'spot', 'joinedAt', 'lastSeen'])
+          && data.keys().hasAll(['name', 'spot', 'joinedAt', 'lastSeen'])
+          && data.name is string
+          && data.name.size() >= 1
+          && data.name.size() <= 20
+          && data.name.trim() == data.name
+          && data.spot is number
+          && data.spot >= 0
+          && data.spot < 1
+          && data.joinedAt == request.time
+          && data.lastSeen == request.time;
+    }
+
+    // Heartbeat from rooms.js: only lastSeen changes, it must be the server time,
+    // and it can't be sent more than once every 5 seconds (rooms.js sends every 15s).
+    function isHeartbeat() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastSeen'])
+          && request.resource.data.lastSeen == request.time
+          && request.time > resource.data.lastSeen + duration.value(5, 's');
+    }
+
+    // ---- rooms ----
+
+    match /rooms/{roomId}/players/{uid} {
+      // Signed-in students can see who is in a known room. This has to work before you
+      // join, because joinRoom() checks the room isn't full before adding you.
+      allow get, list: if signedIn() && knownRoom(roomId);
+
+      // You can only ever write your own document (the doc id must be your uid).
+      allow create: if signedIn() && knownRoom(roomId)
+                    && request.auth.uid == uid
+                    && isValidJoin(request.resource.data);
+
+      // Either a heartbeat, or rejoining after a leftover doc of yours didn't get deleted
+      // (setDoc over an existing doc counts as an update). Rejoining must be a full valid
+      // join with fresh server timestamps, so joinedAt can't be faked or backdated.
+      allow update: if signedIn() && knownRoom(roomId)
+                    && request.auth.uid == uid
+                    && (isHeartbeat() || isValidJoin(request.resource.data));
+
+      // You can only remove yourself.
+      allow delete: if signedIn() && knownRoom(roomId)
+                    && request.auth.uid == uid;
+    }
+
+    // ---- everything else is locked ----
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

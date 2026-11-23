@@ -247,156 +247,142 @@
       animation: ember-glow 1.5s ease-in-out infinite alternate;
     }
 
-    .camp-seat {
+    /* ring of logs around the fire; positions and sizes are set in layoutCampRing() */
+    .camp-ring {
       position: absolute;
-      z-index: 2;
-      width: var(--seat-size);
-      aspect-ratio: 1;
-      padding: 0;
-      border: 0;
-      background: transparent;
-      cursor: pointer;
-      pointer-events: auto;
-      -webkit-tap-highlight-color: transparent;
+      inset: 0;
+      pointer-events: none;
     }
 
-    .camp-seat:focus-visible {
-      outline: 3px solid #fff3b0;
-      outline-offset: -8px;
-      border-radius: 12px;
+    .camp-ring,
+    .camp-count,
+    .camp-join {
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
     }
 
-    .camp-seat:hover .camp-seat-log,
-    .camp-seat.occupied .camp-seat-log {
-      filter: brightness(1.2) drop-shadow(0 0 12px rgba(255, 170, 72, 0.7));
-    }
-
-    .camp-seat-log {
+    .camp-log,
+    .camp-player {
       position: absolute;
       top: 50%;
       left: 50%;
+      transition: transform 0.5s ease, width 0.5s ease;
+    }
+
+    .camp-log {
+      width: var(--log-w);
+      transform: translate(-50%, -50%) translate(var(--lx), var(--ly)) rotate(var(--rot));
+    }
+
+    .camp-log img {
+      display: block;
       width: 100%;
       height: auto;
-      transform: translate(-50%, -50%);
       filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.65));
-      transition: filter 0.2s ease;
-      pointer-events: none;
     }
 
-    .camp-seat.seat-east .camp-seat-log,
-    .camp-seat.seat-west .camp-seat-log {
-      transform: translate(-50%, -50%) rotate(90deg);
+    .camp-log.taken img {
+      filter: brightness(1.15) drop-shadow(0 0 10px rgba(255, 170, 72, 0.6));
     }
 
-    .camp-seat.seat-north {
-      top: calc(50% - var(--seat-radius));
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    .camp-seat.seat-east {
-      top: 50%;
-      left: calc(50% + var(--seat-radius));
-      transform: translate(-50%, -50%);
-    }
-
-    .camp-seat.seat-south {
-      top: calc(50% + var(--seat-radius));
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    .camp-seat.seat-west {
-      top: 50%;
-      left: calc(50% - var(--seat-radius));
-      transform: translate(-50%, -50%);
-    }
-
-    .camp-seat-player {
-      position: absolute;
-      top: 6%;
-      left: 50%;
-      display: none;
-      width: 42%;
-      height: 62%;
-      transform: translateX(-50%);
-      filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.75));
-      pointer-events: none;
-    }
-
-    .camp-seat.occupied .camp-seat-player {
-      display: block;
-      animation: player-sit-down 0.4s cubic-bezier(0.2, 0.8, 0.3, 1) both;
-    }
-
-    .camp-seat-player span {
-      position: absolute;
-      display: block;
-      border: 2px solid #18253b;
-    }
-
-    .camp-player-head {
-      top: 0;
-      left: 36%;
-      width: 28%;
+    .camp-player {
+      z-index: 2;
+      width: var(--p);
       aspect-ratio: 1;
       border-radius: 50%;
-      background: #e7ae7b;
+      background: #ffffff;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.6);
+      transform: translate(-50%, -50%) translate(var(--lx), var(--ly));
+      animation: camper-in 0.45s cubic-bezier(0.2, 0.8, 0.3, 1.3) both;
     }
 
-    .camp-player-body {
-      top: 26%;
-      left: 23%;
-      width: 54%;
-      height: 39%;
-      border-radius: 9px 9px 5px 5px;
-      background: var(--player-shirt, #ed7658);
+    .camp-player.me {
+      box-shadow: 0 0 0 3px #ffd45c, 0 0 14px rgba(255, 212, 92, 0.8);
     }
 
-    .camp-player-arm {
-      top: 34%;
-      width: 20%;
-      height: 30%;
+    .camp-player .camp-name {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 50%;
+      transform: translateX(-50%);
+      max-width: 9em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #fff;
+      font-size: var(--name-size);
+      font-weight: 600;
+      text-shadow: 0 1px 3px #000, 0 0 6px #000;
+    }
+
+    @keyframes camper-in {
+      from { opacity: 0; scale: 0.2; }
+      to   { opacity: 1; scale: 1; }
+    }
+
+    .camp-count {
+      position: absolute;
+      top: 22px;
+      right: 22px;
+      padding: 8px 16px;
       border-radius: 999px;
-      background: #e7ae7b;
+      background: rgba(7, 20, 47, 0.75);
+      color: #fff;
+      font-weight: 600;
     }
 
-    .camp-player-arm.left {
-      left: 8%;
-      transform: rotate(28deg);
+    .camp-join {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 5;
+      display: none;
+      width: min(340px, calc(100vw - 32px));
+      box-sizing: border-box;
+      padding: 26px 24px 20px;
+      border-radius: 20px;
+      background: rgba(10, 24, 54, 0.92);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(255, 190, 90, 0.35);
+      color: #fff;
+      text-align: center;
+      transform: translate(-50%, -50%);
+      pointer-events: auto;
     }
 
-    .camp-player-arm.right {
-      right: 8%;
-      transform: rotate(-28deg);
+    .camp-scene-joining .camp-join { display: block; }
+
+    .camp-join h2 { margin: 0 0 14px; font-size: 1.6rem; }
+    .camp-join label { display: block; margin-bottom: 8px; opacity: 0.85; }
+
+    .camp-join input {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      font: inherit;
+      font-size: 1.1rem;
+      text-align: center;
     }
 
-    .camp-player-leg {
-      top: 58%;
-      width: 42%;
-      height: 20%;
-      border-radius: 5px 5px 999px 999px;
-      background: #25324a;
+    .camp-join input:focus { outline: none; border-color: #ffb13b; }
+
+    .camp-join button {
+      margin-top: 14px;
+      padding: 10px 34px;
+      border: 0;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #ffb13b, #f0691a);
+      color: #fff;
+      font: inherit;
+      font-size: 1.15rem;
+      font-weight: 600;
+      cursor: pointer;
     }
 
-    .camp-player-leg.left {
-      left: 12%;
-      transform: rotate(12deg);
-    }
-
-    .camp-player-leg.right {
-      right: 12%;
-      transform: rotate(-12deg);
-    }
-
-    .seat-east { --player-shirt: #e6a543; }
-    .seat-south { --player-shirt: #66b9a2; }
-    .seat-west { --player-shirt: #9c8bd5; }
-
-    @keyframes player-sit-down {
-      from { opacity: 0; transform: translate(-50%, -35%); }
-      to   { opacity: 1; transform: translate(-50%, 0); }
-    }
+    .camp-join button:disabled { opacity: 0.6; cursor: default; }
+    .camp-join-status { min-height: 1.2em; margin: 12px 0 0; font-size: 0.95rem; color: #ffd45c; }
 
     /* scenario 2 is in a different hospital room; scenario 1's people, speech and panels are hidden */
     .page.module-2.scenario-2 {
@@ -2096,6 +2082,51 @@
       background: radial-gradient(ellipse, transparent 40%, rgba(31, 40, 48, 0.95) 43%, #75808a 56%, #343f49 72%, transparent 75%);
     }
 
+    /* main menu campfire logo (svg) */
+    .cf-logo {
+      position: absolute;
+      inset: 6% 4% 4%;
+      width: 92%;
+      height: 90%;
+      overflow: visible;
+      filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.45));
+    }
+
+    .cf-logo .cf-flame,
+    .cf-logo .cf-embers,
+    .cf-logo .cf-logs,
+    .cf-logo .cf-sparks circle {
+      transform-box: fill-box;
+      transform-origin: 50% 100%;
+    }
+
+    .cf-logo .cf-embers {
+      transform-origin: 50% 50%;
+      animation: ember-glow 1.5s ease-in-out infinite alternate;
+    }
+
+    .cf-logo .cf-flame { animation: flame-flicker 0.75s ease-in-out infinite alternate; }
+    .cf-logo .cf-flame.outer { filter: drop-shadow(0 0 10px rgba(255, 92, 12, 0.8)); }
+    .cf-logo .cf-flame.middle { animation-delay: -0.3s; }
+    .cf-logo .cf-flame.inner { animation-delay: -0.5s; }
+
+    .cf-logo .cf-sparks circle { animation: cf-spark 1.8s ease-out infinite; }
+    .cf-logo .cf-sparks circle:nth-child(2) { animation-delay: -0.6s; }
+    .cf-logo .cf-sparks circle:nth-child(3) { animation-delay: -1.2s; }
+
+    @keyframes cf-spark {
+      0%   { transform: translateY(30px); opacity: 0; }
+      20%  { opacity: 1; }
+      100% { transform: translateY(-40px); opacity: 0; }
+    }
+
+    .campfire-bubble.burst .cf-flame { animation: flame-out 0.24s ease-in forwards; }
+    .campfire-bubble.burst .cf-flame.middle { animation-delay: 0.04s; }
+    .campfire-bubble.burst .cf-flame.inner { animation-delay: 0.08s; }
+    .campfire-bubble.burst .cf-embers { animation: ember-out 0.25s ease-in forwards; }
+    .campfire-bubble.burst .cf-sparks { opacity: 0; }
+    .campfire-bubble.burst .cf-logs { animation: wood-in 0.38s ease-in 0.16s forwards; }
+
     @keyframes flame-flicker {
       from { transform: rotate(-4deg) scaleX(0.94) scaleY(0.96); }
       to   { transform: rotate(4deg) scaleX(1.04) scaleY(1.06); }
@@ -2794,17 +2825,60 @@
       <span class="number">2</span>
     </div>
     <div class="sphere bubble right campfire-bubble" data-module="3" aria-label="Module 3: Cultural Safety in Nursing">
-      <span class="campfire-art" aria-hidden="true">
-        <span class="campfire-embers"></span>
-        <span class="campfire-flame outer"></span>
-        <span class="campfire-flame middle"></span>
-        <span class="campfire-flame inner"></span>
-        <span class="campfire-logo-log horizontal-back"></span>
-        <span class="campfire-logo-log horizontal-front"></span>
-        <span class="campfire-logo-log cross-left"></span>
-        <span class="campfire-logo-log cross-right"></span>
-        <span class="campfire-stones"></span>
-      </span>
+      <!-- hand-drawn campfire logo: glow, three flames, sparks and two crossed logs -->
+      <svg class="cf-logo" viewBox="0 0 200 200" aria-hidden="true">
+        <defs>
+          <radialGradient id="cf-glow-grad" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stop-color="#ffb13b" stop-opacity="0.9"/>
+            <stop offset="0.45" stop-color="#ff6a12" stop-opacity="0.45"/>
+            <stop offset="1" stop-color="#ff3d00" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="cf-outer-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffd23a"/>
+            <stop offset="0.45" stop-color="#ff8a1c"/>
+            <stop offset="1" stop-color="#e2350f"/>
+          </linearGradient>
+          <linearGradient id="cf-middle-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fff38a"/>
+            <stop offset="1" stop-color="#ffa21f"/>
+          </linearGradient>
+          <linearGradient id="cf-inner-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffffff"/>
+            <stop offset="1" stop-color="#fff1a0"/>
+          </linearGradient>
+          <linearGradient id="cf-wood-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#c07a42"/>
+            <stop offset="0.5" stop-color="#8a4f28"/>
+            <stop offset="1" stop-color="#4f2a14"/>
+          </linearGradient>
+        </defs>
+        <ellipse class="cf-embers" cx="100" cy="150" rx="88" ry="58" fill="url(#cf-glow-grad)"/>
+        <path class="cf-flame outer" fill="url(#cf-outer-grad)"
+              d="M100 22 C110 50 136 68 143 102 C150 138 128 164 100 164 C72 164 50 138 57 106 C61 88 73 78 78 60 C85 74 90 80 92 90 C95 66 97 46 100 22 Z"/>
+        <path class="cf-flame middle" fill="url(#cf-middle-grad)"
+              d="M102 58 C110 78 128 94 129 120 C130 146 116 162 100 162 C84 162 70 146 72 122 C74 104 86 96 90 82 C95 92 98 96 99 102 C100 86 101 72 102 58 Z"/>
+        <path class="cf-flame inner" fill="url(#cf-inner-grad)"
+              d="M100 96 C106 110 116 122 116 138 C116 154 108 162 100 162 C92 162 84 154 84 138 C84 122 95 112 100 96 Z"/>
+        <g class="cf-sparks" fill="#ffd45c">
+          <circle cx="82" cy="70" r="3"/>
+          <circle cx="118" cy="58" r="2.5"/>
+          <circle cx="104" cy="40" r="2"/>
+        </g>
+        <g class="cf-logs">
+          <g transform="rotate(-20 100 162)">
+            <rect x="30" y="151" width="140" height="22" rx="11" fill="url(#cf-wood-grad)" stroke="#3b1f0e" stroke-width="2.5"/>
+            <path d="M48 157 H140 M62 166 H118" stroke="#d99a5f" stroke-opacity="0.45" stroke-width="2" stroke-linecap="round"/>
+            <ellipse cx="160" cy="162" rx="8" ry="11" fill="#e0a868" stroke="#3b1f0e" stroke-width="2.5"/>
+            <ellipse cx="160" cy="162" rx="3.5" ry="5" fill="none" stroke="#a8652f" stroke-width="1.5"/>
+          </g>
+          <g transform="rotate(20 100 162)">
+            <rect x="30" y="151" width="140" height="22" rx="11" fill="url(#cf-wood-grad)" stroke="#3b1f0e" stroke-width="2.5"/>
+            <path d="M60 157 H152 M82 166 H138" stroke="#d99a5f" stroke-opacity="0.45" stroke-width="2" stroke-linecap="round"/>
+            <ellipse cx="40" cy="162" rx="8" ry="11" fill="#e0a868" stroke="#3b1f0e" stroke-width="2.5"/>
+            <ellipse cx="40" cy="162" rx="3.5" ry="5" fill="none" stroke="#a8652f" stroke-width="1.5"/>
+          </g>
+        </g>
+      </svg>
     </div>
     <div class="divider one"></div>
     <div class="divider two"></div>
@@ -2844,34 +2918,70 @@
     <div class="module3-camp-scene" role="group" aria-label="Campfire seating area">
       <div class="module3-fire" aria-hidden="true">
         <span class="module3-fire-glow"></span>
-        <span class="campfire-art">
-          <span class="campfire-embers"></span>
-          <span class="campfire-flame outer"></span>
-          <span class="campfire-flame middle"></span>
-          <span class="campfire-flame inner"></span>
-          <img class="campfire-log horizontal-back" src="images/76f99196-3748-4c1c-8295-107c1f53b00a.png" alt="">
-          <img class="campfire-log horizontal-front" src="images/76f99196-3748-4c1c-8295-107c1f53b00a.png" alt="">
-          <img class="campfire-log cross-left" src="images/76f99196-3748-4c1c-8295-107c1f53b00a.png" alt="">
-          <img class="campfire-log cross-right" src="images/76f99196-3748-4c1c-8295-107c1f53b00a.png" alt="">
-          <span class="campfire-stones"></span>
-        </span>
+        <svg class="cf-logo" viewBox="0 0 200 200" aria-hidden="true">
+          <defs>
+            <radialGradient id="cf2-glow-grad" cx="50%" cy="50%" r="50%">
+              <stop offset="0" stop-color="#ffb13b" stop-opacity="0.9"/>
+              <stop offset="0.45" stop-color="#ff6a12" stop-opacity="0.45"/>
+              <stop offset="1" stop-color="#ff3d00" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="cf2-outer-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#ffd23a"/>
+              <stop offset="0.45" stop-color="#ff8a1c"/>
+              <stop offset="1" stop-color="#e2350f"/>
+            </linearGradient>
+            <linearGradient id="cf2-middle-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#fff38a"/>
+              <stop offset="1" stop-color="#ffa21f"/>
+            </linearGradient>
+            <linearGradient id="cf2-inner-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#ffffff"/>
+              <stop offset="1" stop-color="#fff1a0"/>
+            </linearGradient>
+            <linearGradient id="cf2-wood-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#c07a42"/>
+              <stop offset="0.5" stop-color="#8a4f28"/>
+              <stop offset="1" stop-color="#4f2a14"/>
+            </linearGradient>
+          </defs>
+          <ellipse class="cf-embers" cx="100" cy="150" rx="88" ry="58" fill="url(#cf2-glow-grad)"/>
+          <path class="cf-flame outer" fill="url(#cf2-outer-grad)"
+                d="M100 22 C110 50 136 68 143 102 C150 138 128 164 100 164 C72 164 50 138 57 106 C61 88 73 78 78 60 C85 74 90 80 92 90 C95 66 97 46 100 22 Z"/>
+          <path class="cf-flame middle" fill="url(#cf2-middle-grad)"
+                d="M102 58 C110 78 128 94 129 120 C130 146 116 162 100 162 C84 162 70 146 72 122 C74 104 86 96 90 82 C95 92 98 96 99 102 C100 86 101 72 102 58 Z"/>
+          <path class="cf-flame inner" fill="url(#cf2-inner-grad)"
+                d="M100 96 C106 110 116 122 116 138 C116 154 108 162 100 162 C92 162 84 154 84 138 C84 122 95 112 100 96 Z"/>
+          <g class="cf-sparks" fill="#ffd45c">
+            <circle cx="82" cy="70" r="3"/>
+            <circle cx="118" cy="58" r="2.5"/>
+            <circle cx="104" cy="40" r="2"/>
+          </g>
+          <g class="cf-logs">
+            <g transform="rotate(-20 100 162)">
+              <rect x="30" y="151" width="140" height="22" rx="11" fill="url(#cf2-wood-grad)" stroke="#3b1f0e" stroke-width="2.5"/>
+              <path d="M48 157 H140 M62 166 H118" stroke="#d99a5f" stroke-opacity="0.45" stroke-width="2" stroke-linecap="round"/>
+              <ellipse cx="160" cy="162" rx="8" ry="11" fill="#e0a868" stroke="#3b1f0e" stroke-width="2.5"/>
+              <ellipse cx="160" cy="162" rx="3.5" ry="5" fill="none" stroke="#a8652f" stroke-width="1.5"/>
+            </g>
+            <g transform="rotate(20 100 162)">
+              <rect x="30" y="151" width="140" height="22" rx="11" fill="url(#cf2-wood-grad)" stroke="#3b1f0e" stroke-width="2.5"/>
+              <path d="M60 157 H152 M82 166 H138" stroke="#d99a5f" stroke-opacity="0.45" stroke-width="2" stroke-linecap="round"/>
+              <ellipse cx="40" cy="162" rx="8" ry="11" fill="#e0a868" stroke="#3b1f0e" stroke-width="2.5"/>
+              <ellipse cx="40" cy="162" rx="3.5" ry="5" fill="none" stroke="#a8652f" stroke-width="1.5"/>
+            </g>
+          </g>
+        </svg>
       </div>
-      <button class="camp-seat seat-north" type="button" aria-label="Empty campfire seat 1. Activate to sit down." aria-pressed="false">
-        <img class="camp-seat-log" src="images/76f99196-3748-4c1c-8295-107c1f53b00a.png" alt="">
-        <span class="camp-seat-player" aria-hidden="true"><span class="camp-player-head"></span><span class="camp-player-body"></span><span class="camp-player-arm left"></span><span class="camp-player-arm right"></span><span class="camp-player-leg left"></span><span class="camp-player-leg right"></span></span>
-      </button>
-      <button class="camp-seat seat-east" type="button" aria-label="Empty campfire seat 2. Activate to sit down." aria-pressed="false">
-        <img class="camp-seat-log" src="images/76f99196-3748-4c1c-8295-107c1f53b00a.png" alt="">
-        <span class="camp-seat-player" aria-hidden="true"><span class="camp-player-head"></span><span class="camp-player-body"></span><span class="camp-player-arm left"></span><span class="camp-player-arm right"></span><span class="camp-player-leg left"></span><span class="camp-player-leg right"></span></span>
-      </button>
-      <button class="camp-seat seat-south" type="button" aria-label="Empty campfire seat 3. Activate to sit down." aria-pressed="false">
-        <img class="camp-seat-log" src="images/76f99196-3748-4c1c-8295-107c1f53b00a.png" alt="">
-        <span class="camp-seat-player" aria-hidden="true"><span class="camp-player-head"></span><span class="camp-player-body"></span><span class="camp-player-arm left"></span><span class="camp-player-arm right"></span><span class="camp-player-leg left"></span><span class="camp-player-leg right"></span></span>
-      </button>
-      <button class="camp-seat seat-west" type="button" aria-label="Empty campfire seat 4. Activate to sit down." aria-pressed="false">
-        <img class="camp-seat-log" src="images/76f99196-3748-4c1c-8295-107c1f53b00a.png" alt="">
-        <span class="camp-seat-player" aria-hidden="true"><span class="camp-player-head"></span><span class="camp-player-body"></span><span class="camp-player-arm left"></span><span class="camp-player-arm right"></span><span class="camp-player-leg left"></span><span class="camp-player-leg right"></span></span>
-      </button>
+      <!-- logs and players are built by layoutCampRing(); one log per camper (at least 4) -->
+      <div class="camp-ring" aria-live="polite"></div>
+      <div class="camp-count" hidden></div>
+      <form class="camp-join" id="camp-join" autocomplete="off">
+        <h2>Join the campfire</h2>
+        <label for="camp-name">What's your name?</label>
+        <input id="camp-name" maxlength="20" placeholder="Your name" required>
+        <button type="submit">Join</button>
+        <p class="camp-join-status" role="status"></p>
+      </form>
     </div>
     <div class="s2-room"></div>
     <div class="s2-pov"></div>
@@ -4420,6 +4530,7 @@
           page.className = 'page module-' + bubble.dataset.module;
           startModuleMusic(bubble.dataset.module);
           if (bubble.dataset.module === '2') startScene();
+          if (bubble.dataset.module === '3') showCampJoin();
           if (bubble.dataset.module === '1') {
             bgVideo.currentTime = 0;
             bgVideo.play().catch(() => {});
@@ -4430,27 +4541,297 @@
         }, { fish: 1100, poo: 1600 }[effect] || 650); // let any splatter play out before switching pages
     }
 
-    const campSeats = [...page.querySelectorAll('.camp-seat')];
+    // ---- module 3: online campfire ----
+    // Two ways to share who is sitting at the fire:
+    //   firebase (default)  Cloud Firestore through js/rooms.js
+    //   mqtt (?camp=mqtt)   the original free public MQTT broker, kept as a fallback until
+    //                       Firebase has been confirmed in class. Each camper publishes a
+    //                       retained "presence" message; the broker's last-will clears it.
+    // Both feed the same `campers` map and layoutCampRing(), so the scene looks identical.
+    const CAMP_BACKEND = new URLSearchParams(location.search).get('camp') === 'mqtt' ? 'mqtt' : 'firebase';
+    const CAMP_ROOM = 'campfire';          // Firestore room id (listed in firestore.rules)
+    const CAMP_JOIN_TIMEOUT = 15000;
+    const CAMP_BROKER = 'wss://broker.hivemq.com:8884/mqtt';
+    const CAMP_TOPIC = 'nurs102-group1-campfire-v1/users/';
+    const CAMP_MAX = 20;
+    const CAMP_HEARTBEAT = 15000;   // re-announce every 15s
+    const CAMP_STALE = 45000;       // drop anyone not heard from in 45s
+    const LOG_IMG = 'images/76f99196-3748-4c1c-8295-107c1f53b00a.png';
 
-    campSeats.forEach((seat, index) => {
-      seat.addEventListener('click', () => {
-        const occupied = seat.classList.toggle('occupied');
-        seat.setAttribute('aria-pressed', String(occupied));
-        seat.setAttribute('aria-label', `Campfire seat ${index + 1}, ${occupied ? 'occupied. Activate to stand up.' : 'empty. Activate to sit down.'}`);
-      });
-    });
+    const campScene = page.querySelector('.module3-camp-scene');
+    const campRing = campScene.querySelector('.camp-ring');
+    const campFire = campScene.querySelector('.module3-fire');
+    const campCount = campScene.querySelector('.camp-count');
+    const campForm = document.getElementById('camp-join');
+    const campName = document.getElementById('camp-name');
+    const campStatus = campForm.querySelector('.camp-join-status');
+    const campJoinBtn = campForm.querySelector('button');
 
-    function resetCampSeats() {
-      campSeats.forEach((seat, index) => {
-        seat.classList.remove('occupied');
-        seat.setAttribute('aria-pressed', 'false');
-        seat.setAttribute('aria-label', `Empty campfire seat ${index + 1}. Activate to sit down.`);
+    let campClient = null;
+    let campMe = null;               // { id, name, spot, ts }
+    let campers = new Map();          // id -> { id, name, spot, ts }
+    let campTimers = [];
+    let campSession = 0;              // bumped on every join/leave; late async results from an old session are ignored
+    let fbCamp = null;                // firebase session: { me, stopWatching }
+
+    function loadMqtt() {
+      if (window.mqtt) return Promise.resolve();
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
       });
     }
 
+    function showCampJoin() {
+      // never carry a previous visit's connection, heartbeat or listener into this one
+      if (fbCamp || campClient) leaveCampfire();
+      campers = new Map();
+      layoutCampRing();
+      campScene.classList.add('camp-scene-joining');
+      campStatus.textContent = '';
+      campJoinBtn.disabled = false;
+      try { campName.value = localStorage.getItem('campName') || ''; } catch (e) {}
+      setTimeout(() => campName.focus(), 300);
+    }
+
+    campForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      const name = campName.value.trim().slice(0, 20);
+      if (!name) return;
+      try { localStorage.setItem('campName', name); } catch (err) {}
+      campJoinBtn.disabled = true;
+      campStatus.textContent = 'Connecting…';
+      try {
+        if (CAMP_BACKEND === 'firebase') {
+          await joinCampfireFirebase(name);
+        } else {
+          await loadMqtt();
+          await joinCampfire(name);
+        }
+      } catch (err) {
+        if (err && err.stale) return; // they left module 3 while we were connecting
+        leaveCampfire();
+        campJoinBtn.disabled = false;
+        campStatus.textContent = err && err.full ? 'The campfire is full (20 people). Try again later.'
+                                                  : "Couldn't connect. Check your internet and try again.";
+      }
+    });
+
+    function joinCampfire(name) {
+      return new Promise((resolve, reject) => {
+        const id = Math.random().toString(36).slice(2, 10);
+        const myTopic = CAMP_TOPIC + id;
+        const client = mqtt.connect(CAMP_BROKER, {
+          clientId: 'camp_' + id,
+          reconnectPeriod: 3000,
+          connectTimeout: 8000,
+          will: { topic: myTopic, payload: '', retain: true, qos: 1 },
+        });
+        campClient = client;
+        let settled = false;
+        const fail = err => { if (!settled) { settled = true; reject(err); } };
+        const failTimer = setTimeout(() => fail(new Error('timeout')), 10000);
+
+        client.on('message', (topic, payload) => onCampMessage(topic, payload.toString()));
+        client.on('error', fail);
+        client.on('connect', () => {
+          if (settled) { if (campMe) announce(); return; } // reconnected: re-announce
+          client.subscribe(CAMP_TOPIC + '+', { qos: 1 }, err => {
+            if (err) return fail(err);
+            // give the broker a moment to send everyone already sitting there
+            setTimeout(() => {
+              if (settled) return;
+              clearTimeout(failTimer);
+              pruneCampers();
+              if (campers.size >= CAMP_MAX) return fail({ full: true });
+              settled = true;
+              campMe = { id, name, spot: Math.random(), ts: Date.now() };
+              campers.set(id, campMe);
+              announce();
+              campTimers.push(setInterval(announce, CAMP_HEARTBEAT));
+              campTimers.push(setInterval(() => { pruneCampers(); layoutCampRing(); }, 5000));
+              campScene.classList.remove('camp-scene-joining');
+              campStatus.textContent = '';
+              layoutCampRing();
+              resolve();
+            }, 1200);
+          });
+        });
+      });
+    }
+
+    function announce() {
+      if (!campClient || !campMe) return;
+      campMe.ts = Date.now();
+      campClient.publish(CAMP_TOPIC + campMe.id, JSON.stringify(campMe), { retain: true, qos: 1 });
+    }
+
+    function onCampMessage(topic, text) {
+      const id = topic.slice(CAMP_TOPIC.length);
+      if (campMe && id === campMe.id) return;
+      if (!text) { campers.delete(id); layoutCampRing(); return; }
+      let d;
+      try { d = JSON.parse(text); } catch (e) { return; }
+      if (!d || typeof d.name !== 'string' || typeof d.spot !== 'number' || typeof d.ts !== 'number') return;
+      campers.set(id, { id, name: d.name.slice(0, 20), spot: d.spot, ts: d.ts });
+      pruneCampers();
+      layoutCampRing();
+    }
+
+    // forget anyone whose tab died without the broker noticing, and wipe their leftover message
+    function pruneCampers() {
+      const now = Date.now();
+      for (const [id, c] of campers) {
+        if (campMe && id === campMe.id) continue;
+        if (now - c.ts > CAMP_STALE) {
+          campers.delete(id);
+          if (campClient && campClient.connected) campClient.publish(CAMP_TOPIC + id, '', { retain: true, qos: 1 });
+        }
+      }
+    }
+
+    // ---- firebase version ----
+    async function joinCampfireFirebase(name) {
+      const session = ++campSession;
+      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), CAMP_JOIN_TIMEOUT));
+      const joining = import('./js/rooms.js').then(rooms =>
+        rooms.joinRoom(CAMP_ROOM, name, { max: CAMP_MAX }).then(me => ({ rooms, me })));
+
+      let rooms, me;
+      try {
+        ({ rooms, me } = await Promise.race([joining, timeout]));
+      } catch (err) {
+        // if the join finishes after we gave up, take them straight back out
+        joining.then(r => r.me.leave()).catch(() => {});
+        // an old attempt failing must not tear down a newer visit to module 3
+        throw session === campSession ? err : { stale: true };
+      }
+      if (session !== campSession) { me.leave(); throw { stale: true }; }
+
+      campMe = { id: me.uid, name: me.name, spot: me.spot, ts: Date.now() };
+      campers = new Map([[me.uid, campMe]]);
+      const stopWatching = rooms.watchPlayers(CAMP_ROOM, players => {
+        if (session !== campSession) return;
+        campers = new Map(players.map(p => [p.uid, { id: p.uid, name: p.name, spot: p.spot, ts: p.lastSeen }]));
+        campers.set(me.uid, campMe); // you always see yourself
+        layoutCampRing();
+      });
+      fbCamp = { me, stopWatching };
+
+      campScene.classList.remove('camp-scene-joining');
+      campStatus.textContent = '';
+      layoutCampRing();
+    }
+
+    function leaveCampfire() {
+      campSession++;
+      if (fbCamp) {
+        fbCamp.stopWatching();
+        fbCamp.me.leave(); // intentional: rooms.js stops its heartbeat and won't rejoin
+        fbCamp = null;
+      }
+      campTimers.forEach(clearInterval);
+      campTimers = [];
+      if (campClient) {
+        const client = campClient;
+        if (campMe && client.connected) client.publish(CAMP_TOPIC + campMe.id, '', { retain: true, qos: 1 }, () => client.end());
+        else client.end(true);
+      }
+      campClient = null;
+      campMe = null;
+      campers = new Map();
+      campScene.classList.remove('camp-scene-joining');
+      layoutCampRing();
+    }
+
+    window.addEventListener('pagehide', () => {
+      if (campClient && campMe) campClient.publish(CAMP_TOPIC + campMe.id, '', { retain: true, qos: 0 });
+    });
+
+    // one log per camper (never fewer than 4), spaced evenly in a circle around the fire.
+    // The circle widens as people join; once it reaches the edge of the screen the logs shrink instead.
+    function layoutCampRing() {
+      const list = [...campers.values()].sort((a, b) => a.spot - b.spot || (a.id < b.id ? -1 : 1));
+      const n = Math.max(4, list.length);
+      const W = campScene.clientWidth, H = campScene.clientHeight;
+      if (!W || !H) return;
+      const fireR = campFire.offsetWidth / 2;
+      const maxR = Math.min(W, H) / 2 - Math.max(40, Math.min(W, H) * 0.07);
+      let logW = Math.min(fireR * 1.25, 200);
+      let R = Math.max(fireR + logW * 0.35, (n * logW * 1.25) / (2 * Math.PI));
+      if (R > maxR) {
+        R = Math.max(maxR, fireR + 30);
+        logW = (2 * Math.PI * R) / (n * 1.25);
+      }
+
+      // each camper takes the log closest to their random spot; if it's taken, the next free one
+      const seatOf = new Map();
+      const taken = new Array(n).fill(false);
+      list.forEach(c => {
+        let s = Math.floor(c.spot * n) % n;
+        while (taken[s]) s = (s + 1) % n;
+        taken[s] = true;
+        seatOf.set(c.id, s);
+      });
+
+      const logs = [...campRing.querySelectorAll('.camp-log')];
+      while (logs.length < n) {
+        const log = document.createElement('div');
+        log.className = 'camp-log';
+        log.innerHTML = `<img src="${LOG_IMG}" alt="">`;
+        campRing.appendChild(log);
+        logs.push(log);
+      }
+      while (logs.length > n) logs.pop().remove();
+
+      const pos = i => {
+        const a = (i / n) * 2 * Math.PI;
+        return { x: R * Math.sin(a), y: -R * Math.cos(a), deg: (i / n) * 360 };
+      };
+      logs.forEach((log, i) => {
+        const p = pos(i);
+        log.style.setProperty('--log-w', logW + 'px');
+        log.style.setProperty('--lx', p.x + 'px');
+        log.style.setProperty('--ly', p.y + 'px');
+        log.style.setProperty('--rot', p.deg + 'deg');
+        log.classList.toggle('taken', taken[i]);
+      });
+
+      const size = Math.max(18, Math.min(44, logW * 0.32));
+      const existing = new Map([...campRing.querySelectorAll('.camp-player')].map(el => [el.dataset.id, el]));
+      list.forEach(c => {
+        let el = existing.get(c.id);
+        existing.delete(c.id);
+        if (!el) {
+          el = document.createElement('div');
+          el.className = 'camp-player';
+          el.dataset.id = c.id;
+          el.innerHTML = '<span class="camp-name"></span>';
+          campRing.appendChild(el);
+        }
+        const isMe = campMe && c.id === campMe.id;
+        el.classList.toggle('me', !!isMe);
+        el.querySelector('.camp-name').textContent = isMe ? c.name + ' (you)' : c.name;
+        const p = pos(seatOf.get(c.id));
+        el.style.setProperty('--p', size + 'px');
+        el.style.setProperty('--lx', p.x + 'px');
+        el.style.setProperty('--ly', p.y + 'px');
+        el.style.setProperty('--name-size', Math.max(11, Math.min(15, size * 0.42)) + 'px');
+      });
+      existing.forEach(el => el.remove());
+
+      campCount.hidden = !campMe;
+      campCount.textContent = `${list.length} / ${CAMP_MAX} around the fire`;
+    }
+
+    window.addEventListener('resize', () => { if (page.classList.contains('module-3')) layoutCampRing(); });
+
     back.addEventListener('click', () => {
       page.className = 'page hidden';
-      resetCampSeats();
+      leaveCampfire();
       bgVideo.pause();
       stopModuleMusic();
       stopFloaters();

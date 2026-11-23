@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Firebase Check</title>
+  <style>
+    :root { --bg: #0b1730; --fg: #eef3ff; --ok: #5fd38d; --bad: #ff7a7a; --wait: #ffd45c; }
+    body { margin: 0; padding: 24px 16px; background: var(--bg); color: var(--fg); font: 16px/1.5 system-ui, sans-serif; }
+    main { max-width: 640px; margin: 0 auto; }
+    h1 { font-size: 1.4rem; }
+    li { margin: 8px 0; }
+    .ok { color: var(--ok); } .bad { color: var(--bad); } .wait { color: var(--wait); }
+    code { background: rgba(255,255,255,0.1); padding: 1px 5px; border-radius: 4px; word-break: break-word; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Firebase connection check</h1>
+  <p>Open this through a local server (for example <code>py -m http.server 8000</code>, then
+     <code>localhost:8000/firebase-test.html</code>). It won't work by double-clicking the file.</p>
+  <ol id="steps"></ol>
+  <p id="summary" class="wait">Running…</p>
+</main>
+<script type="module">
+  const list = document.getElementById('steps');
+  const summary = document.getElementById('summary');
+  const results = [];
+
+  async function step(label, fn) {
+    const li = document.createElement('li');
+    li.className = 'wait';
+    li.textContent = label + ' …';
+    list.appendChild(li);
+    try {
+      const note = await fn();
+      li.className = 'ok';
+      li.textContent = '✓ ' + label + (note ? ' — ' + note : '');
+      results.push(true);
+      return true;
+    } catch (err) {
+      li.className = 'bad';
+      li.innerHTML = '';
+      li.append('✗ ' + label + ' — ');
+      const c = document.createElement('code');
+      c.textContent = (err && (err.code || err.message)) || String(err);
+      li.appendChild(c);
+      results.push(false);
+      return false;
+    }
+  }
+
+  const withTimeout = (p, ms, what) => Promise.race([p, new Promise((_, r) => setTimeout(() => r(new Error(what + ' timed out')), ms))]);
+
+  let fb, rooms, me;
+  const ok1 = await step('Load Firebase SDK and initialize the app', async () => {
+    fb = await import('./js/firebase.js');
+    rooms = await import('./js/rooms.js');
+    return 'project ' + fb.app.options.projectId;
+  });
+
+  const ok2 = ok1 && await step('Anonymous sign-in (Authentication)', async () => {
+    const user = await withTimeout(fb.ensureSignedIn(), 10000, 'Sign-in');
+    return 'uid ' + user.uid.slice(0, 8) + '…';
+  });
+
+  const ok3 = ok2 && await step('Join a test room (Firestore write)', async () => {
+    me = await withTimeout(rooms.joinRoom('_connection-test', 'Tester', { max: 20 }), 10000, 'Firestore write');
+    return 'wrote rooms/_connection-test/players/' + me.uid.slice(0, 8) + '…';
+  });
+
+  const ok4 = ok3 && await step('See yourself in the room in real time (Firestore listen)', () =>
+    withTimeout(new Promise(resolve => {
+      const stop = rooms.watchPlayers('_connection-test', players => {
+        if (players.some(p => p.uid === me.uid)) { stop(); resolve(players.length + ' player(s) in room'); }
+      });
+    }), 10000, 'Real-time listener'));
+
+  if (ok3) await step('Leave the room (Firestore delete)', async () => { await me.leave(); });
+
+  const allOk = results.length === 5 && results.every(Boolean);
+  summary.className = allOk ? 'ok' : 'bad';
+  summary.textContent = allOk ? 'All good: Firebase is ready for multiplayer.'
+                              : 'Something is not set up yet. See the red line above.';
+  document.title = 'Firebase Check: ' + (allOk ? 'PASS' : 'FAIL');
+</script>
+</body>
+</html>
