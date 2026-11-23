@@ -1,14 +1,14 @@
 // Real-time multiplayer rooms on Cloud Firestore.
 //
 // Data layout (must match firestore.rules):
-//   rooms/{roomId}/players/{uid}  ->  { name, spot, joinedAt, lastSeen }
+//   rooms/{roomId}/players/{uid}  ->  { name, spot, joinedAt, lastSeen, character? }
 //
 // Firestore can't tell when a browser closes, so every player refreshes `lastSeen` on a
 // heartbeat and everyone ignores players who haven't been seen for a while.
 //
 // Usage:
 //   import { joinRoom, watchPlayers } from './js/rooms.js';
-//   const me = await joinRoom('campfire', 'Jvhan', { max: 20 });   // may throw RoomFullError
+//   const me = await joinRoom('campfire', 'Jvhan', { max: 20, character: 'soldier-1' }); // may throw RoomFullError
 //   const stopWatching = watchPlayers('campfire', players => draw(players));
 //   ...
 //   stopWatching();
@@ -40,7 +40,7 @@ export class RoomFullError extends Error {
 // Delivery delay only makes an estimate too low, so the largest one seen is the best.
 let serverMinusPerf = null;
 
-function observeServerTime(serverMillis) {
+export function observeServerTime(serverMillis) {
   const est = serverMillis - performance.now();
   if (serverMinusPerf === null || est > serverMinusPerf) serverMinusPerf = est;
 }
@@ -59,6 +59,7 @@ function readPlayer(snap) {
     uid: snap.id,
     name: d.name,
     spot: d.spot,
+    character: typeof d.character === 'string' ? d.character : null,
     joinedAt: d.joinedAt ? d.joinedAt.toMillis() : serverNow(),
     // a write of ours that the server hasn't confirmed yet counts as "just now"
     lastSeen: !pending && d.lastSeen ? d.lastSeen.toMillis() : serverNow(),
@@ -83,14 +84,16 @@ const byJoinOrder = (a, b) => a.joinedAt - b.joinedAt || (a.uid < b.uid ? -1 : 1
 //     cache, deleted while offline) it's recreated with the same name and spot;
 //   - Firestore itself reconnects and resends after a network drop.
 // leave() is intentional: it stops all of that and deletes the doc for good.
-export async function joinRoom(roomId, name, { max = 20, spot = Math.random() } = {}) {
+export async function joinRoom(roomId, name, { max = 20, spot = Math.random(), character = null } = {}) {
   const user = await ensureSignedIn();
   name = String(name).trim().slice(0, 20);
   if (!name) throw new Error('A name is required');
   if (!(spot >= 0 && spot < 1)) spot = Math.random();
 
   const ref = doc(playersOf(roomId), user.uid);
-  const writeJoin = () => setDoc(ref, { name, spot, joinedAt: serverTimestamp(), lastSeen: serverTimestamp() });
+  const joinData = { name, spot };
+  if (character) joinData.character = String(character);
+  const writeJoin = () => setDoc(ref, { ...joinData, joinedAt: serverTimestamp(), lastSeen: serverTimestamp() });
 
   await writeJoin();
   // read our own doc back to learn the server's clock before judging anyone else's age
@@ -157,6 +160,7 @@ export async function joinRoom(roomId, name, { max = 20, spot = Math.random() } 
     uid: user.uid,
     name,
     spot,
+    character: joinData.character || null,
     get left() { return left; },
     async leave() {
       if (left) return;
@@ -186,15 +190,20 @@ export function watchPlayers(roomId, callback, { onError } = {}) {
     if (stopped) return;
     const myUid = auth.currentUser && auth.currentUser.uid;
     const present = latest.filter(p => p.uid === myUid || isFresh(p)).sort(byJoinOrder);
-    const key = present.map(p => `${p.uid}:${p.name}:${p.spot}`).join('|');
+    const key = present.map(p => `${p.uid}:${p.name}:${p.spot}:${p.character}`).join('|');
     if (key !== lastKey) { lastKey = key; callback(present); }
   };
 
   ensureSignedIn().then(() => {
     if (stopped) return;
+    let synced = false;
     stopSnapshot = onSnapshot(playersOf(roomId), snap => {
-      // a heartbeat that just arrived from the server tells us roughly what time it is there
-      if (!snap.metadata.fromCache) {
+      // a heartbeat that just arrived from the server tells us roughly what time it is there.
+      // The first server snapshot is skipped: it holds whatever is stored, including players
+      // who left long ago, and their old times would make it look like it's still back then
+      // (a watcher who never joined, like admin, would then see them as present).
+      if (!snap.metadata.fromCache && !synced) synced = true;
+      else if (!snap.metadata.fromCache) {
         snap.docChanges().forEach(ch => {
           if (ch.type === 'removed' || ch.doc.metadata.hasPendingWrites) return;
           const t = ch.doc.data().lastSeen;

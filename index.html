@@ -72,6 +72,232 @@
       height: 26px;
     }
 
+    /* admin button, top left of the main menu, and its password box */
+    .admin-btn {
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      z-index: 4;
+      padding: 8px 18px;
+      border: 3px solid #ffffff;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #7bbcff 0%, #2a78e0 60%, #0b3a8c 100%);
+      box-shadow:
+        0 0 16px rgba(74, 158, 255, 0.4),
+        0 6px 12px rgba(0, 0, 0, 0.5),
+        inset 0 3px 6px rgba(255, 255, 255, 0.5);
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .admin-btn:hover  { transform: scale(1.06); }
+    .admin-btn:active { transform: scale(0.95); }
+    .admin-btn.unlocked { background: linear-gradient(180deg, #8ff0a8 0%, #2fb35a 60%, #13652e 100%); }
+
+    .admin-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      background: rgba(2, 11, 26, 0.7);
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
+    }
+    .admin-modal[hidden] { display: none; }
+    .admin-box {
+      width: min(340px, 100%);
+      box-sizing: border-box;
+      padding: 24px;
+      border: 3px solid #ffffff;
+      border-radius: 24px;
+      background: linear-gradient(180deg, #0b3f73 0%, #041a3a 100%);
+      box-shadow: 0 0 30px rgba(74, 158, 255, 0.45), 0 14px 30px rgba(0, 0, 0, 0.6);
+      color: #ffffff;
+      text-align: center;
+      animation: pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+    }
+    .admin-box h2 { margin: 0 0 14px; font-size: 24px; }
+    .admin-box input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 14px;
+      border: 2px solid #7bbcff;
+      border-radius: 12px;
+      background: #ffffff;
+      font: inherit;
+      font-size: 18px;
+      color: #062a6b;
+    }
+    .admin-box.shake { animation: admin-shake 0.35s; }
+    @keyframes admin-shake {
+      25% { transform: translateX(-8px); }
+      50% { transform: translateX(8px); }
+      75% { transform: translateX(-4px); }
+    }
+    .admin-actions { display: flex; gap: 10px; margin-top: 16px; }
+    .admin-actions button {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid #ffffff;
+      border-radius: 999px;
+      background: #2a78e0;
+      font: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      cursor: pointer;
+    }
+    .admin-actions button[type="button"] { background: transparent; }
+    .admin-error { min-height: 1.3em; margin: 10px 0 0; color: #ffb3b3; font-size: 15px; }
+
+    /* "what are you using?" picker shown when the site opens */
+    .device-pick {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      background: rgba(2, 11, 26, 0.82);
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
+      color: #ffffff;
+      text-align: center;
+    }
+    .device-pick[hidden] { display: none; }
+    .device-pick h2 {
+      margin: 0 0 6px;
+      font-size: clamp(26px, 5vw, 40px);
+      text-shadow: 0 0 18px rgba(74, 158, 255, 0.6);
+    }
+    .device-pick p { margin: 0 0 24px; font-size: 17px; opacity: 0.85; }
+    .device-options {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+      animation: pop-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+    }
+    .device-options button {
+      width: 150px;
+      padding: 18px 10px 14px;
+      border: 3px solid #ffffff;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #7bbcff 0%, #2a78e0 60%, #0b3a8c 100%);
+      box-shadow:
+        0 0 18px rgba(74, 158, 255, 0.45),
+        0 8px 16px rgba(0, 0, 0, 0.5),
+        inset 0 3px 6px rgba(255, 255, 255, 0.5);
+      font: inherit;
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .device-options button:hover  { transform: scale(1.06); }
+    .device-options button:active { transform: scale(0.95); }
+    .device-options svg {
+      display: block;
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 8px;
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    @media (max-width: 520px) {
+      .device-options button { width: 100%; max-width: 260px; display: flex; align-items: center; gap: 14px; padding: 12px 18px; }
+      .device-options svg { width: 40px; height: 40px; margin: 0; }
+    }
+
+    /* mobile only: "rotate your device" while playing a game in portrait */
+    .rotate-device {
+      position: fixed;
+      inset: 0;
+      z-index: 40; /* above every game layer, so nothing behind it can be tapped */
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(2, 11, 26, 0.78);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
+      color: #ffffff;
+      text-align: center;
+      touch-action: none;
+    }
+    .rotate-device[hidden] { display: none; }
+    .rotate-device-inner { max-width: 320px; animation: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; }
+    .rotate-device svg {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 18px;
+      overflow: visible;
+      filter: drop-shadow(0 0 16px rgba(74, 158, 255, 0.55));
+    }
+    .rotate-phone {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: rotate-phone 2.6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+    }
+    .rotate-arrow { animation: rotate-arrow 2.6s ease-in-out infinite; }
+    @keyframes rotate-phone {
+      0%, 15%   { transform: rotate(0deg); }
+      45%, 70%  { transform: rotate(-90deg); }
+      95%, 100% { transform: rotate(0deg); }
+    }
+    @keyframes rotate-arrow {
+      0%, 10%, 50%, 100% { opacity: 0; }
+      20%, 40% { opacity: 1; }
+    }
+    .rotate-device h2 {
+      margin: 0 0 10px;
+      font-size: 30px;
+      text-shadow: 0 0 18px rgba(74, 158, 255, 0.6);
+    }
+    .rotate-device p { margin: 0; font-size: 17px; line-height: 1.4; opacity: 0.9; }
+
+    /* freeze the game's animations underneath while the overlay is up */
+    body.rotate-paused .page,
+    body.rotate-paused .page * { animation-play-state: paused !important; }
+
+    /* the player's coin wallet, top right everywhere (module 1 shows it in its score box instead) */
+    .coin-wallet {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 8;
+      padding: 8px 18px;
+      border: 3px solid #ffffff;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(42, 120, 224, 0.9) 0%, rgba(11, 58, 140, 0.92) 100%);
+      box-shadow:
+        0 0 16px rgba(74, 158, 255, 0.4),
+        0 6px 12px rgba(0, 0, 0, 0.5),
+        inset 0 3px 6px rgba(255, 255, 255, 0.4);
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    .coin-wallet.bump { animation: score-bump 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    body:has(.page.module-1:not(.hidden)) .coin-wallet { display: none; }
+    /* narrow screens: keep the title clear of the Admin button and the wallet */
+    @media (max-width: 700px) {
+      #home .welcome { top: max(7vh, 78px); }
+    }
+    /* at the campfire the counter and admin list move down to make room */
+    .page.module-3 .camp-count { top: 76px; }
+    .page.module-3 .camp-admin { top: 124px; max-height: calc(100% - 150px); }
+
     .music-btn .off-mark { display: none; }
     .music-btn.muted .on-waves { display: none; }
     .music-btn.muted .off-mark { display: inline; }
@@ -214,9 +440,10 @@
     }
 
     .module3-camp-scene {
-      --fire-size: clamp(170px, 32vmin, 300px);
-      --seat-size: clamp(124px, 18vw, 224px);
-      --seat-radius: calc(var(--fire-size) / 2 + var(--seat-size) / 6 + clamp(14px, 2vmin, 28px));
+      --fire-size: clamp(110px, 21vmin, 200px);
+      /* where the fire sits; players and wolves circle around this point */
+      --fire-x: 43%;
+      --fire-y: 42%;
       position: absolute;
       inset: 0;
       z-index: 1;
@@ -230,8 +457,8 @@
 
     .module3-fire {
       position: absolute;
-      top: 50%;
-      left: 50%;
+      top: var(--fire-y);
+      left: var(--fire-x);
       z-index: 1;
       width: var(--fire-size);
       aspect-ratio: 1;
@@ -247,7 +474,33 @@
       animation: ember-glow 1.5s ease-in-out infinite alternate;
     }
 
-    /* ring of logs around the fire; positions and sizes are set in layoutCampRing() */
+    /* werewolves walking a loop around the outside of the players; moved by stepWolves() */
+    .camp-wolves {
+      position: absolute;
+      inset: 0;
+      z-index: 0; /* its own layer: wolves sort among themselves, always under players and labels */
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .camp-wolf {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: var(--wolf, 110px);
+      height: var(--wolf, 110px);
+      background-repeat: no-repeat;
+      /* each sheet is --frames frames of 128x128 side by side; which sheet is set by setWolfAnim() */
+      background-size: calc(var(--wolf, 110px) * var(--frames, 11)) 100%;
+      image-rendering: pixelated;
+      filter: drop-shadow(0 6px 4px rgba(0, 0, 0, 0.55));
+      will-change: transform;
+    }
+    @keyframes wolf-anim {
+      from { background-position: 0 0; }
+      to   { background-position: calc(var(--wolf, 110px) * var(--frames, 11) * -1) 0; }
+    }
+
+    /* players seated in a ring around the fire; positions and sizes are set in layoutCampRing() */
     .camp-ring {
       position: absolute;
       inset: 0;
@@ -260,31 +513,11 @@
       font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
     }
 
-    .camp-log,
     .camp-player {
       position: absolute;
-      top: 50%;
-      left: 50%;
+      top: var(--fire-y);
+      left: var(--fire-x);
       transition: transform 0.5s ease, width 0.5s ease;
-    }
-
-    .camp-log {
-      width: var(--log-w);
-      transform: translate(-50%, -50%) translate(var(--lx), var(--ly)) rotate(var(--rot));
-    }
-
-    .camp-log img {
-      display: block;
-      width: 100%;
-      height: auto;
-      filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.65));
-    }
-
-    .camp-log.taken img {
-      filter: brightness(1.15) drop-shadow(0 0 10px rgba(255, 170, 72, 0.6));
-    }
-
-    .camp-player {
       z-index: 2;
       width: var(--p);
       aspect-ratio: 1;
@@ -297,6 +530,61 @@
 
     .camp-player.me {
       box-shadow: 0 0 0 3px #ffd45c, 0 0 14px rgba(255, 212, 92, 0.8);
+    }
+
+    /* a player with a character: the sprite stands with its feet on the seat */
+    .camp-player.has-char {
+      width: var(--sprite);
+      border-radius: 0;
+      background: none;
+      box-shadow: none;
+      transform: translate(-50%, -94%) translate(var(--lx), var(--ly));
+    }
+    .camp-player.has-char .camp-sprite { filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.6)); }
+    .camp-player.has-char.face-left .camp-sprite { transform: scaleX(-1); }
+    .camp-player.has-char .camp-name { top: 44%; transform: translate(-50%, -100%); }
+    /* battle: hearts above the name, the player whose turn it is glows, the dead fade away */
+    .camp-player .camp-hearts {
+      position: absolute;
+      top: 44%;
+      left: 50%;
+      transform: translate(-50%, calc(-100% - 1.35em));
+      color: #ff5a6e;
+      font-size: 13px;
+      letter-spacing: 1px;
+      line-height: 1;
+      white-space: nowrap;
+      text-shadow: 0 1px 3px #000;
+    }
+    .camp-player:not(.has-char) .camp-hearts { top: -1.6em; transform: translateX(-50%); }
+    .camp-player.turn::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      width: 60%;
+      height: 14%;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(255, 120, 40, 0.9), rgba(255, 120, 40, 0) 70%);
+      transform: translate(-50%, 30%);
+      animation: turn-pulse 0.9s ease-in-out infinite alternate;
+    }
+    @keyframes turn-pulse { from { opacity: 0.5; } to { opacity: 1; } }
+    /* replaces the join animation, whose end state would otherwise keep them visible */
+    .camp-player.dead { animation: camper-out 0.6s forwards; pointer-events: none; }
+    @keyframes camper-out { to { opacity: 0; scale: 0.8; } }
+
+    /* your own character gets a warm glow on the ground */
+    .camp-player.has-char.me::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      width: 46%;
+      height: 12%;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(255, 212, 92, 0.85), rgba(255, 212, 92, 0) 70%);
+      transform: translate(-50%, 30%);
     }
 
     .camp-player .camp-name {
@@ -329,6 +617,119 @@
       color: #fff;
       font-weight: 600;
     }
+
+    /* battle: whose turn / what happened, top centre */
+    .battle-banner {
+      position: absolute;
+      top: 22px;
+      left: 50%;
+      z-index: 6;
+      max-width: calc(100% - 360px);
+      padding: 8px 20px;
+      border: 2px solid #ffb13b;
+      border-radius: 999px;
+      background: rgba(7, 20, 47, 0.88);
+      color: #fff;
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transform: translateX(-50%);
+    }
+    .battle-banner[hidden] { display: none; }
+    @media (max-width: 760px) {
+      .battle-banner { top: auto; bottom: 12px; max-width: calc(100% - 24px); font-size: 15px; }
+    }
+
+    /* battle: the question for the player whose turn it is */
+    .battle-question {
+      position: absolute;
+      left: 50%;
+      bottom: 20px;
+      z-index: 7;
+      width: min(560px, calc(100% - 32px));
+      box-sizing: border-box;
+      padding: 16px 18px 18px;
+      border-radius: 20px;
+      background: rgba(10, 24, 54, 0.95);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(255, 190, 90, 0.5);
+      color: #fff;
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
+      transform: translateX(-50%);
+      pointer-events: auto;
+      animation: pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+    }
+    .battle-question[hidden] { display: none; }
+    .battle-timer {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.15);
+      overflow: hidden;
+    }
+    .battle-timer-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #ff5a3c, #ffb13b);
+      transform-origin: left;
+    }
+    .battle-q-text { margin: 12px 0; font-size: 1.1rem; font-weight: 600; line-height: 1.35; }
+    .battle-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .battle-choices button {
+      padding: 10px 12px;
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      font: inherit;
+      font-size: 0.95rem;
+      text-align: left;
+      cursor: pointer;
+    }
+    .battle-choices button:hover { border-color: #ffb13b; background: rgba(255, 177, 59, 0.18); }
+    .battle-choices b { color: #ffd45c; margin-right: 6px; }
+    @media (max-width: 520px) { .battle-choices { grid-template-columns: 1fr; } }
+
+    /* admin only: list of everyone at the campfire, under the counter */
+    .camp-admin {
+      position: absolute;
+      top: 70px;
+      right: 22px;
+      z-index: 4;
+      display: none;
+      width: 220px;
+      max-height: calc(100% - 100px);
+      box-sizing: border-box;
+      padding: 12px 14px;
+      border: 2px solid #2fb35a;
+      border-radius: 16px;
+      background: rgba(7, 20, 47, 0.85);
+      color: #fff;
+      font-family: 'Grandstander', 'Comic Sans MS', sans-serif;
+      overflow-y: auto;
+    }
+    body.admin .camp-admin:not([hidden]) { display: block; }
+    .camp-admin { pointer-events: auto; }
+    .camp-admin-actions { display: flex; gap: 6px; margin-bottom: 10px; }
+    .camp-admin-actions button {
+      flex: 1;
+      padding: 7px 6px;
+      border: 2px solid #ffffff;
+      border-radius: 999px;
+      background: #2fb35a;
+      color: #fff;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .camp-admin-actions button.danger { background: #c8402f; }
+    .camp-admin-actions button:disabled { opacity: 0.45; cursor: default; }
+    .camp-admin h3 { margin: 0 0 8px; font-size: 16px; color: #8ff0a8; }
+    .camp-admin ol { margin: 0; padding-left: 22px; font-size: 15px; line-height: 1.5; }
+    .camp-admin li { overflow-wrap: anywhere; }
 
     .camp-join {
       position: absolute;
@@ -382,6 +783,75 @@
     }
 
     .camp-join button:disabled { opacity: 0.6; cursor: default; }
+
+    /* step 1 asks for a name, step 2 for a character */
+    .camp-join[data-step="name"] .camp-step-char,
+    .camp-join[data-step="char"] .camp-step-name { display: none; }
+    .camp-join[data-step="char"] {
+      width: min(620px, calc(100vw - 32px));
+      max-height: calc(100% - 32px);
+      overflow-y: auto;
+    }
+    .char-group h3 {
+      margin: 12px 0 8px;
+      font-size: 1.05rem;
+      color: #ffd45c;
+      text-align: left;
+    }
+    .char-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .camp-join .char-option {
+      margin: 0;
+      padding: 6px 4px 8px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.06);
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: transform 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .camp-join .char-option:hover { transform: translateY(-2px); border-color: rgba(255, 190, 90, 0.7); }
+    .camp-join .char-option[aria-checked="true"] {
+      border-color: #ffb13b;
+      background: rgba(255, 177, 59, 0.22);
+      box-shadow: 0 0 14px rgba(255, 177, 59, 0.45);
+    }
+    .char-option .char-preview {
+      position: relative;
+      height: 92px;
+      overflow: hidden;
+    }
+    /* the sheets have lots of empty space above the character, so the preview shows the bottom of the frame */
+    .char-option .camp-sprite {
+      --sprite: 128px;
+      inset: auto;
+      bottom: -6px;
+      left: 50%;
+      width: var(--sprite);
+      height: var(--sprite);
+      transform: translateX(-50%);
+    }
+    .camp-char-actions { display: flex; justify-content: center; gap: 10px; }
+    .camp-join button.secondary { background: rgba(255, 255, 255, 0.14); }
+    .camp-join .camp-watch { display: none; margin-left: 6px; }
+    body.admin .camp-join .camp-watch { display: inline-block; }
+
+    /* an animated character from one of the sprite sheets (frames side by side, 128x128 each) */
+    .camp-sprite {
+      position: absolute;
+      inset: 0;
+      background-repeat: no-repeat;
+      background-size: calc(100% * var(--frames)) 100%;
+      image-rendering: pixelated;
+      animation: char-idle calc(var(--frames) * 0.13s) steps(var(--frames)) infinite;
+    }
+    @keyframes char-idle {
+      from { background-position: 0 0; }
+      to   { background-position: calc(var(--sprite) * var(--frames) * -1) 0; }
+    }
     .camp-join-status { min-height: 1.2em; margin: 12px 0 0; font-size: 0.95rem; color: #ffd45c; }
 
     /* scenario 2 is in a different hospital room; scenario 1's people, speech and panels are hidden */
@@ -969,7 +1439,7 @@
       text-shadow: none;
     }
 
-    /* points tracker, top right of module 1; sits above the question view so it's always visible */
+    /* coin tracker, top right of module 1; sits above the question view so it's always visible */
     .score {
       display: none;
       position: absolute;
@@ -1009,34 +1479,6 @@
       0%   { transform: scale(1); }
       40%  { transform: scale(1.35); color: #ffe76b; }
       100% { transform: scale(1); }
-    }
-
-    .score-goal {
-      margin-top: 4px;
-      font-size: 15px;
-      font-weight: 500;
-      line-height: 1.3;
-    }
-
-    .score-bar {
-      height: 12px;
-      margin-top: 10px;
-      border: 2px solid #ffffff;
-      border-radius: 999px;
-      background: rgba(2, 20, 70, 0.6);
-      overflow: hidden;
-    }
-
-    .score-fill {
-      width: 0;
-      height: 100%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, #a6ddff, #ffffff);
-      transition: width 0.6s cubic-bezier(0.34, 1.2, 0.64, 1);
-    }
-
-    .score.won .score-fill {
-      background: linear-gradient(90deg, #ffe76b, #fff7c2);
     }
 
     /* right answers in a row; glows gold from 3 up */
@@ -1301,8 +1743,8 @@
       display: block;
     }
 
-    /* TEMPORARY: module 2 skip straight to scenario 2, for testing. Remove when done */
-    .page.module-2 .skip-scene {
+    /* admin only: module 2 skip straight to scenario 2 */
+    body.admin .page.module-2 .skip-scene {
       display: block;
       z-index: 9; /* above the end card too */
     }
@@ -2897,6 +3339,8 @@
       </svg>
     </button>
 
+    <button class="admin-btn" id="admin-btn">Admin</button>
+
     <div class="credits">
       <div class="credits-inner">
         <h2>Group 1 (Chapters 7, 8)</h2>
@@ -2910,6 +3354,57 @@
         </ul>
       </div>
     </div>
+  </div>
+
+  <div class="coin-wallet" id="coin-wallet" aria-live="polite"></div>
+
+  <div class="device-pick" id="device-pick" role="dialog" aria-labelledby="device-pick-title">
+    <div>
+      <h2 id="device-pick-title">What are you using?</h2>
+      <p>Pick your device so the game fits your screen.</p>
+      <div class="device-options">
+        <button type="button" data-device="ipad">
+          <svg viewBox="0 0 64 64"><rect x="12" y="6" width="40" height="52" rx="5" /><circle cx="32" cy="51" r="2" /></svg>
+          iPad
+        </button>
+        <button type="button" data-device="mobile">
+          <svg viewBox="0 0 64 64"><rect x="20" y="6" width="24" height="52" rx="5" /><path d="M28 12h8" /><circle cx="32" cy="51" r="1.8" /></svg>
+          Mobile
+        </button>
+        <button type="button" data-device="laptop">
+          <svg viewBox="0 0 64 64"><rect x="12" y="14" width="40" height="28" rx="3" /><path d="M5 48h54l-4 5H9z" /></svg>
+          Laptop
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="rotate-device" id="rotate-device" role="alertdialog" aria-labelledby="rotate-title" aria-describedby="rotate-text" hidden>
+    <div class="rotate-device-inner">
+      <svg viewBox="0 0 120 120" aria-hidden="true">
+        <path class="rotate-arrow" d="M96 30a46 46 0 0 1 8 34" fill="none" stroke="#7bbcff" stroke-width="5" stroke-linecap="round" />
+        <path class="rotate-arrow" d="M96 58l8 8 6-10" fill="none" stroke="#7bbcff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+        <g class="rotate-phone">
+          <rect x="38" y="16" width="44" height="88" rx="9" fill="#2a78e0" stroke="#ffffff" stroke-width="4" />
+          <rect x="44" y="26" width="32" height="64" rx="3" fill="#0b3a8c" />
+          <circle cx="60" cy="97" r="2.6" fill="#ffffff" />
+        </g>
+      </svg>
+      <h2 id="rotate-title">Rotate Your Device</h2>
+      <p id="rotate-text">For the best gaming experience, please rotate your phone horizontally.</p>
+    </div>
+  </div>
+
+  <div class="admin-modal" id="admin-modal" hidden>
+    <form class="admin-box" id="admin-form" autocomplete="off">
+      <h2>Admin</h2>
+      <input type="password" id="admin-pass" placeholder="Password" aria-label="Admin password" required>
+      <p class="admin-error" id="admin-error" role="status"></p>
+      <div class="admin-actions">
+        <button type="button" id="admin-cancel">Cancel</button>
+        <button type="submit">Enter</button>
+      </div>
+    </form>
   </div>
 
   <div class="page hidden" id="page">
@@ -2972,14 +3467,41 @@
           </g>
         </svg>
       </div>
-      <!-- logs and players are built by layoutCampRing(); one log per camper (at least 4) -->
+      <div class="camp-wolves" aria-hidden="true"></div>
+      <!-- players are placed by layoutCampRing(); one seat per camper (at least 4) -->
       <div class="camp-ring" aria-live="polite"></div>
       <div class="camp-count" hidden></div>
-      <form class="camp-join" id="camp-join" autocomplete="off">
-        <h2>Join the campfire</h2>
-        <label for="camp-name">What's your name?</label>
-        <input id="camp-name" maxlength="20" placeholder="Your name" required>
-        <button type="submit">Join</button>
+      <div class="camp-admin" hidden>
+        <h3></h3>
+        <div class="camp-admin-actions">
+          <button type="button" id="battle-start" disabled>Start battle</button>
+          <button type="button" id="battle-end" class="danger" disabled>End battle</button>
+        </div>
+        <ol></ol>
+      </div>
+      <div class="battle-banner" role="status" hidden></div>
+      <div class="battle-question" role="dialog" aria-label="Your question" hidden>
+        <div class="battle-timer"><div class="battle-timer-fill"></div></div>
+        <p class="battle-q-text"></p>
+        <div class="battle-choices"></div>
+      </div>
+      <form class="camp-join" id="camp-join" autocomplete="off" data-step="name">
+        <div class="camp-step camp-step-name">
+          <h2>Join the campfire</h2>
+          <label for="camp-name">What's your name?</label>
+          <input id="camp-name" maxlength="20" placeholder="Your name" required>
+          <button type="submit" id="camp-next">Next</button>
+          <!-- admin only: watch without a character -->
+          <button type="button" class="secondary camp-watch" id="camp-watch">Just watch</button>
+        </div>
+        <div class="camp-step camp-step-char">
+          <h2>Choose your character</h2>
+          <div class="char-groups" role="radiogroup" aria-label="Characters"></div>
+          <div class="camp-char-actions">
+            <button type="button" class="secondary" id="camp-back">Back</button>
+            <button type="submit" id="camp-join-btn" disabled>Join</button>
+          </div>
+        </div>
         <p class="camp-join-status" role="status"></p>
       </form>
     </div>
@@ -3003,7 +3525,7 @@
 
     <div class="intro">
       <div class="caption first">Pop the bubbles for easy questions, and catch the fish for harder ones!</div>
-      <div class="caption second">Bubbles are worth 1 point and fish are worth 2. Keep your streak going!</div>
+      <div class="caption second">Each bubble gives you 1 coin and each fish gives you 2 coins. Keep your streak going!</div>
       <div class="caption count three">3</div>
       <div class="caption count two">2</div>
       <div class="caption count one">1</div>
@@ -3042,14 +3564,12 @@
     </div>
 
     <button class="skip" id="skip">Skip ▸</button>
-    <!-- TEMPORARY: skips to scenario 2 in module 2, for testing. Remove when done -->
+    <!-- admin only (see body.admin): skips to scenario 2 in module 2 -->
     <button class="skip skip-scene" id="skip-scene">Skip to game 2 ▸</button>
     <div class="score" id="score">
-      <div class="score-points" id="score-points">0 pts</div>
-      <div class="score-goal" id="score-goal"></div>
-      <div class="score-bar"><div class="score-fill" id="score-fill"></div></div>
+      <div class="score-points" id="score-points">🪙 0 coins</div>
       <div class="score-streak" id="score-streak"></div>
-      <div class="score-key">Bubble 1 · Fish 2</div>
+      <div class="score-key">Bubble 1 coin · Fish 2 coins</div>
     </div>
   </div>
 
@@ -3080,6 +3600,76 @@
     }
     let busy = false;
 
+    // ---- device picker, shown every time the site opens ----
+    // The choice is kept on <body data-device="ipad|mobile|laptop"> for layout tweaks.
+    const devicePick = document.getElementById('device-pick');
+    devicePick.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
+      document.body.dataset.device = btn.dataset.device;
+      try { localStorage.setItem('device', btn.dataset.device); } catch (e) {}
+      devicePick.hidden = true;
+    }));
+
+    // ---- admin button (top left of the menu) ----
+    // Only a hash of the password is kept here so it isn't readable in the page source.
+    // This is a simple lock for the site, not real security: anything an admin unlocks
+    // still runs in the browser.
+    const ADMIN_HASH = '3959e3e6bbe71e67ac98130b98d91c39b7d528718dfa3e9b497958a05027cb2a';
+    const adminBtn = document.getElementById('admin-btn');
+    const adminModal = document.getElementById('admin-modal');
+    const adminForm = document.getElementById('admin-form');
+    const adminPass = document.getElementById('admin-pass');
+    const adminError = document.getElementById('admin-error');
+    let isAdmin = false;
+    try { isAdmin = sessionStorage.getItem('nurs102-admin') === '1'; } catch (e) {}
+
+    function showAdminState() {
+      adminBtn.classList.toggle('unlocked', isAdmin);
+      document.body.classList.toggle('admin', isAdmin);
+      adminBtn.textContent = isAdmin ? 'Admin ✓' : 'Admin';
+    }
+    showAdminState();
+
+    async function sha256(text) {
+      const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+      return [...new Uint8Array(bytes)].map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function closeAdmin() {
+      adminModal.hidden = true;
+      adminPass.value = '';
+      adminError.textContent = '';
+    }
+
+    adminBtn.addEventListener('click', () => {
+      if (isAdmin) {
+        if (!confirm('Log out of admin?')) return;
+        isAdmin = false;
+        try { sessionStorage.removeItem('nurs102-admin'); } catch (e) {}
+        showAdminState();
+        return;
+      }
+      adminModal.hidden = false;
+      adminPass.focus();
+    });
+    document.getElementById('admin-cancel').addEventListener('click', closeAdmin);
+    adminModal.addEventListener('click', e => { if (e.target === adminModal) closeAdmin(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !adminModal.hidden) closeAdmin(); });
+
+    adminForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      if (await sha256(adminPass.value) === ADMIN_HASH) {
+        isAdmin = true;
+        try { sessionStorage.setItem('nurs102-admin', '1'); } catch (e) {}
+        showAdminState();
+        closeAdmin();
+      } else {
+        adminError.textContent = 'Wrong password';
+        adminPass.select();
+        const box = adminForm;
+        box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
+      }
+    });
+
     // ---- module 1 question bubbles ----
     const floatLayer = document.getElementById('float-layer');
     const FLOAT_START_DELAY = 11600; // just as the countdown's "1" fades
@@ -3096,38 +3686,29 @@
     let floatSession = 0; // bumped on stop so leftover spawn timers do nothing
     let quizOpen = false;
 
-    // ---- points ----
-    // 10 bubbles x 1 + 5 fish x 2 = 20 points available in total
-    const POINTS = { small: 1, medium: 1, big: 3, fish: 2 };
-    const PRIZE_POINTS = 12;
-    const PRIZE_PERSON = '______'; // who to see for the prize
-    const scoreEl = document.getElementById('score');
+    // ---- coins ----
+    // every bubble is worth 1 coin and every fish 2 coins
+    const POINTS = { small: 1, medium: 1, big: 1, fish: 2 };
     const scorePoints = document.getElementById('score-points');
-    const scoreGoal = document.getElementById('score-goal');
-    const scoreFill = document.getElementById('score-fill');
     const scoreStreak = document.getElementById('score-streak');
+    const coinWallet = document.getElementById('coin-wallet');
+    // the wallet is kept on this device and adds up across games and visits
     let score = 0;
+    try { score = Math.max(0, parseInt(localStorage.getItem('coins'), 10) || 0); } catch (e) {}
+    const coinText = n => '🪙 ' + n + (n === 1 ? ' coin' : ' coins');
     let streak = 0; // right answers in a row
     let bestStreak = 0;
-    let prizePending = false; // show the prize pop-up once the current question closes
 
     function renderScore() {
-      scorePoints.textContent = score + (score === 1 ? ' pt' : ' pts');
+      scorePoints.textContent = coinWallet.textContent = coinText(score);
       scoreStreak.innerHTML = `${streak >= 3 ? '🔥 ' : ''}Streak <b>${streak}</b> · Best <b>${bestStreak}</b>`;
       scoreStreak.classList.toggle('hot', streak >= 3);
-      scoreFill.style.width = Math.min(100, score / PRIZE_POINTS * 100) + '%';
-      const won = score >= PRIZE_POINTS;
-      scoreEl.classList.toggle('won', won);
-      scoreGoal.textContent = won
-        ? `Prize unlocked! See ${PRIZE_PERSON} for your prize!`
-        : `Reach ${PRIZE_POINTS} points to win a prize!`;
     }
 
+    // a new round of module 1 starts a fresh streak; coins are kept
     function resetScore() {
-      score = 0;
       streak = 0;
       bestStreak = 0;
-      prizePending = false;
       renderScore();
     }
 
@@ -3142,135 +3723,15 @@
     }
 
     function addPoints(n) {
-      const before = score;
       score += n;
+      try { localStorage.setItem('coins', String(score)); } catch (e) {}
       renderScore();
       scorePoints.classList.remove('bump');
       void scorePoints.offsetWidth;
       scorePoints.classList.add('bump');
-      if (before < PRIZE_POINTS && score >= PRIZE_POINTS) prizePending = true;
-    }
-
-    function showPrize() {
-      const prize = document.createElement('div');
-      prize.className = 'prize';
-      prize.innerHTML = `
-        <canvas class="fireworks"></canvas>
-        <div class="prize-card">
-          <svg class="prize-star" viewBox="0 0 100 100" aria-hidden="true">
-            <defs>
-              <linearGradient id="star-gold" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#fffbe0" />
-                <stop offset="0.5" stop-color="#ffd93d" />
-                <stop offset="1" stop-color="#f4a100" />
-              </linearGradient>
-            </defs>
-            <path d="M50 6 L62 36 L94 38 L69 58 L78 90 L50 72 L22 90 L31 58 L6 38 L38 36 Z"
-              fill="url(#star-gold)" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" />
-            <ellipse cx="42" cy="32" rx="9" ry="5" fill="#ffffff" opacity="0.6" transform="rotate(-25 42 32)" />
-          </svg>
-          <div class="prize-kicker">Prize unlocked</div>
-          <h2>You did it!</h2>
-          <div class="prize-points"><span></span> points</div>
-          <p>Go see <strong></strong> to claim your prize.</p>
-          <div class="prize-actions">
-            <button class="prize-btn">Keep playing</button>
-            <button class="prize-btn secondary">Main menu</button>
-          </div>
-        </div>`;
-      prize.querySelector('.prize-points span').textContent = PRIZE_POINTS;
-      prize.querySelector('p strong').textContent = PRIZE_PERSON;
-
-      quizOpen = true; // keeps the bubbles paused while the pop-up is up
-      page.appendChild(prize);
-
-      // win jingle; the module music dips under it for a few seconds, then comes back
-      playSound(winSound);
-      if (!moduleMusic.paused) {
-        fadeMusic(moduleMusic, 0.08, 300);
-        setTimeout(() => {
-          if (!moduleMusic.paused) fadeMusic(moduleMusic, MUSIC_VOLUME, 1200);
-        }, 3600);
-      }
-
-      // started after it's on the page so the canvas has a size
-      const stopFireworks = launchFireworks(prize.querySelector('.fireworks'));
-      prize.querySelector('.prize-btn').addEventListener('click', () => {
-        stopFireworks();
-        prize.remove();
-        quizOpen = false;
-      });
-      prize.querySelector('.prize-btn.secondary').addEventListener('click', () => {
-        stopFireworks();
-        back.click(); // same as the Return button: clears the module and goes back to the menu
-      });
-    }
-
-    // a handful of small firework bursts behind the prize card for a few seconds
-    function launchFireworks(canvas) {
-      const ctx = canvas.getContext('2d');
-      const colors = ['#ffffff', '#a6ddff', '#ffe76b', '#ffb3d9', '#7bbcff'];
-      const sparks = [];
-      const start = performance.now();
-      let nextBurst = start + 200;
-      let frame;
-
-      function resize() {
-        canvas.width = canvas.clientWidth * devicePixelRatio;
-        canvas.height = canvas.clientHeight * devicePixelRatio;
-        ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-      }
-
-      function burst() {
-        const W = canvas.clientWidth;
-        const H = canvas.clientHeight;
-        // keep bursts toward the sides and top so they frame the card instead of hiding behind it
-        const side = Math.random() < 0.5 ? rand(0.08, 0.3) : rand(0.7, 0.92);
-        const x = W * (Math.random() < 0.25 ? rand(0.35, 0.65) : side);
-        const y = H * rand(0.12, 0.45);
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        const count = 34;
-        for (let i = 0; i < count; i++) {
-          const angle = (i / count) * Math.PI * 2 + rand(-0.08, 0.08);
-          const speed = rand(110, 210);
-          sparks.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life: 1, color, size: rand(1.8, 3.2) });
-        }
-      }
-
-      let last = start;
-      function step(now) {
-        const dt = Math.min((now - last) / 1000, 0.05);
-        last = now;
-        if (now < start + 4500 && now >= nextBurst) {
-          burst();
-          nextBurst = now + rand(380, 700);
-        }
-
-        ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
-        for (let i = sparks.length - 1; i >= 0; i--) {
-          const s = sparks[i];
-          s.vx *= 0.97;
-          s.vy = s.vy * 0.97 + 140 * dt; // drag plus a little gravity
-          s.x += s.vx * dt;
-          s.y += s.vy * dt;
-          s.life -= dt * 0.75;
-          if (s.life <= 0) { sparks.splice(i, 1); continue; }
-          ctx.globalAlpha = s.life;
-          ctx.fillStyle = s.color;
-          ctx.shadowColor = s.color;
-          ctx.shadowBlur = 8;
-          ctx.beginPath();
-          ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        ctx.globalAlpha = 1;
-
-        if (now < start + 4500 || sparks.length) frame = requestAnimationFrame(step);
-      }
-
-      resize();
-      frame = requestAnimationFrame(step);
-      return () => cancelAnimationFrame(frame);
+      coinWallet.classList.remove('bump');
+      void coinWallet.offsetWidth;
+      coinWallet.classList.add('bump');
     }
 
     renderScore();
@@ -3522,7 +3983,7 @@
             const earned = POINTS[f.kind];
             addPoints(earned);
             updateStreak(true);
-            message.textContent = `Correct! +${earned} ${earned === 1 ? 'point' : 'points'}` +
+            message.textContent = `Correct! +${earned} ${earned === 1 ? 'coin' : 'coins'}` +
               (streak >= 2 ? ` · ${streak} in a row!` : '');
           } else {
             playSound(wrongSound);
@@ -3567,10 +4028,6 @@
         if (e.target !== quiz) return;
         quiz.remove();
         quizOpen = false;
-        if (prizePending) {
-          prizePending = false;
-          showPrize();
-        }
       });
     }
 
@@ -3586,8 +4043,8 @@
       const W = window.innerWidth;
       const H = window.innerHeight;
 
-      // everything holds still while a question is open
-      if (quizOpen) {
+      // everything holds still while a question is open (or the rotate-your-phone screen is up)
+      if (quizOpen || rotatePaused) {
         floatFrame = requestAnimationFrame(stepFloaters);
         return;
       }
@@ -3832,7 +4289,8 @@
         if (b !== btn && !b.classList.contains('wrong')) b.classList.add('dim');
       });
       btn.classList.add('correct');
-      nurseFeedback.innerHTML = s.say ? '<b>Great choice!</b> ' : '<b>Correct!</b> ';
+      addPoints(1); // 1 coin for every right answer in module 2
+      nurseFeedback.innerHTML = (s.say ? '<b>Great choice!</b>' : '<b>Correct!</b>') + ' <b>+1 coin</b> ';
       nurseFeedback.append(choice.why);
       // the panel gets out of the way quickly so the conversation is visible
       sceneTimers.push(
@@ -4056,8 +4514,9 @@
       const right = c === q.answer;
       if (right) {
         s2Score++;
+        addPoints(1); // 1 coin for every right answer in module 2
         playSound(correctSound, CORRECT_SOUND_START);
-        feedback.textContent = 'Correct!';
+        feedback.textContent = 'Correct! +1 coin';
       } else {
         playSound(wrongSound);
         feedback.textContent = `Not quite. The answer is ${'ABCD'[q.answer]}. ${q.choices[q.answer]}.`;
@@ -4530,7 +4989,10 @@
           page.className = 'page module-' + bubble.dataset.module;
           startModuleMusic(bubble.dataset.module);
           if (bubble.dataset.module === '2') startScene();
-          if (bubble.dataset.module === '3') showCampJoin();
+          if (bubble.dataset.module === '3') {
+            startWolves();
+            showCampJoin();
+          }
           if (bubble.dataset.module === '1') {
             bgVideo.currentTime = 0;
             bgVideo.play().catch(() => {});
@@ -4556,16 +5018,97 @@
     const CAMP_MAX = 20;
     const CAMP_HEARTBEAT = 15000;   // re-announce every 15s
     const CAMP_STALE = 45000;       // drop anyone not heard from in 45s
-    const LOG_IMG = 'images/76f99196-3748-4c1c-8295-107c1f53b00a.png';
 
     const campScene = page.querySelector('.module3-camp-scene');
     const campRing = campScene.querySelector('.camp-ring');
     const campFire = campScene.querySelector('.module3-fire');
+    let campRingOuter = 0; // how far out the players reach, for the wolves' path
+
     const campCount = campScene.querySelector('.camp-count');
+    const campAdmin = campScene.querySelector('.camp-admin');
     const campForm = document.getElementById('camp-join');
     const campName = document.getElementById('camp-name');
     const campStatus = campForm.querySelector('.camp-join-status');
-    const campJoinBtn = campForm.querySelector('button');
+    const campJoinBtn = document.getElementById('camp-join-btn');
+    const campNextBtn = document.getElementById('camp-next');
+    const charGroups = campForm.querySelector('.char-groups');
+
+    // characters players can pick (ids must match isCharacter() in firestore.rules).
+    // `frames` is how many 128px frames are in the Idle.png sheet.
+    const CAMP_CHARACTERS = [
+      { group: 'Gangsters', id: 'gangster-1', label: 'Gangster 1', idle: 'images/gangsters/Gangsters_1/Idle.png', frames: 6 },
+      { group: 'Gangsters', id: 'gangster-2', label: 'Gangster 2', idle: 'images/gangsters/Gangsters_2/Idle.png', frames: 7 },
+      { group: 'Gangsters', id: 'gangster-3', label: 'Gangster 3', idle: 'images/gangsters/Gangsters_3/Idle.png', frames: 7 },
+      { group: 'Homeless',  id: 'homeless-1', label: 'Homeless 1', idle: 'images/homeless/Homeless_1/Idle.png', frames: 6 },
+      { group: 'Homeless',  id: 'homeless-2', label: 'Homeless 2', idle: 'images/homeless/Homeless_2/Idle.png', frames: 7 },
+      { group: 'Homeless',  id: 'homeless-3', label: 'Homeless 3', idle: 'images/homeless/Homeless_3/Idle.png', frames: 6 },
+      { group: 'Soldiers',  id: 'soldier-1',  label: 'Soldier 1',  idle: 'images/soldiers/Soldier_1/Idle.png',  frames: 7 },
+      { group: 'Soldiers',  id: 'soldier-2',  label: 'Soldier 2',  idle: 'images/soldiers/Soldier_2/Idle.png',  frames: 9 },
+      { group: 'Soldiers',  id: 'soldier-3',  label: 'Soldier 3',  idle: 'images/soldiers/Soldier_3/Idle.png',  frames: 7 },
+    ];
+    // fight animations: [sheet, frames] in the same folder as each character's Idle.png
+    const CHAR_FIGHT = {
+      'gangster-1': { attack: ['Shot.png', 4],      hurt: ['Hurt.png', 5], dead: ['Dead.png', 5] },
+      'gangster-2': { attack: ['Attack_1.png', 6],  hurt: ['Hurt.png', 4], dead: ['Dead.png', 5] },
+      'gangster-3': { attack: ['Shot.png', 12],     hurt: ['Hurt.png', 4], dead: ['Dead.png', 5] },
+      'homeless-1': { attack: ['Attack_1.png', 5],  hurt: ['Hurt.png', 3], dead: ['Dead.png', 4] },
+      'homeless-2': { attack: ['Attack_1.png', 10], hurt: ['Hurt.png', 3], dead: ['Dead.png', 4] },
+      'homeless-3': { attack: ['Attack_1.png', 5],  hurt: ['Hurt.png', 3], dead: ['Dead.png', 4] },
+      'soldier-1':  { attack: ['Shot_1.png', 4],    hurt: ['Hurt.png', 3], dead: ['Dead.png', 4] },
+      'soldier-2':  { attack: ['Shot_1.png', 4],    hurt: ['Hurt.png', 3], dead: ['Dead.png', 4] },
+      'soldier-3':  { attack: ['Shot_1.png', 4],    hurt: ['Hurt.png', 4], dead: ['Dead.png', 5] },
+    };
+    CAMP_CHARACTERS.forEach(c => {
+      const dir = c.idle.slice(0, c.idle.lastIndexOf('/') + 1);
+      c.fight = Object.fromEntries(Object.entries(CHAR_FIGHT[c.id]).map(([k, [file, frames]]) => [k, { src: dir + file, frames }]));
+    });
+    const charById = new Map(CAMP_CHARACTERS.map(c => [c.id, c]));
+    let campChar = null; // the character picked in the join form
+
+    function setSprite(el, character) {
+      el.style.backgroundImage = `url("${character.idle}")`;
+      el.style.setProperty('--frames', character.frames);
+    }
+
+    // build the picker: one box per character, grouped
+    [...new Set(CAMP_CHARACTERS.map(c => c.group))].forEach(group => {
+      const section = document.createElement('div');
+      section.className = 'char-group';
+      section.innerHTML = '<h3></h3><div class="char-grid"></div>';
+      section.querySelector('h3').textContent = group;
+      CAMP_CHARACTERS.filter(c => c.group === group).forEach(c => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'char-option';
+        btn.dataset.char = c.id;
+        btn.setAttribute('role', 'radio');
+        btn.setAttribute('aria-checked', 'false');
+        btn.innerHTML = '<div class="char-preview"><div class="camp-sprite"></div></div><span></span>';
+        btn.lastChild.textContent = c.label;
+        setSprite(btn.querySelector('.camp-sprite'), c);
+        btn.addEventListener('click', () => pickCampChar(c.id));
+        section.querySelector('.char-grid').appendChild(btn);
+      });
+      charGroups.appendChild(section);
+    });
+
+    function pickCampChar(id) {
+      campChar = charById.has(id) ? id : null;
+      charGroups.querySelectorAll('.char-option').forEach(b =>
+        b.setAttribute('aria-checked', String(b.dataset.char === campChar)));
+      campJoinBtn.disabled = !campChar;
+    }
+
+    function setJoinStep(step) {
+      campForm.dataset.step = step;
+      campStatus.textContent = '';
+      if (step === 'name') setTimeout(() => campName.focus(), 50);
+    }
+
+    document.getElementById('camp-back').addEventListener('click', () => setJoinStep('name'));
+    document.getElementById('camp-watch').addEventListener('click', () => {
+      if (isAdmin && CAMP_BACKEND === 'firebase') watchCampfireAsAdmin();
+    });
 
     let campClient = null;
     let campMe = null;               // { id, name, spot, ts }
@@ -4573,6 +5116,7 @@
     let campTimers = [];
     let campSession = 0;              // bumped on every join/leave; late async results from an old session are ignored
     let fbCamp = null;                // firebase session: { me, stopWatching }
+    let campAdminView = false;        // admin watching without a name or seat
 
     function loadMqtt() {
       if (window.mqtt) return Promise.resolve();
@@ -4591,10 +5135,33 @@
       campers = new Map();
       layoutCampRing();
       campScene.classList.add('camp-scene-joining');
-      campStatus.textContent = '';
-      campJoinBtn.disabled = false;
-      try { campName.value = localStorage.getItem('campName') || ''; } catch (e) {}
+      setJoinStep('name');
+      campNextBtn.disabled = false;
+      try {
+        campName.value = localStorage.getItem('campName') || '';
+        pickCampChar(localStorage.getItem('campChar')); // last time's character, if any
+      } catch (e) { pickCampChar(null); }
       setTimeout(() => campName.focus(), 300);
+    }
+
+    // admin: no name and no seat, just watch everyone at the campfire
+    function watchCampfireAsAdmin() {
+      if (fbCamp || campClient) leaveCampfire();
+      const session = ++campSession;
+      campers = new Map();
+      campAdminView = true;
+      campScene.classList.remove('camp-scene-joining');
+      layoutCampRing();
+      import('./js/rooms.js').then(rooms => {
+        if (session !== campSession) return;
+        const stopWatching = rooms.watchPlayers(CAMP_ROOM, players => {
+          if (session !== campSession) return;
+          campers = new Map(players.map(p => [p.uid, { id: p.uid, name: p.name, spot: p.spot, character: p.character, ts: p.lastSeen }]));
+          layoutCampRing();
+        }, { onError: () => { if (session === campSession) campCount.textContent = "Couldn't connect"; } });
+        fbCamp = { me: null, stopWatching };
+        startBattleWatch(session);
+      }).catch(() => { if (session === campSession) campCount.textContent = "Couldn't connect"; });
     }
 
     campForm.addEventListener('submit', async e => {
@@ -4602,11 +5169,15 @@
       const name = campName.value.trim().slice(0, 20);
       if (!name) return;
       try { localStorage.setItem('campName', name); } catch (err) {}
+      // step 1 -> step 2: pick a character before joining
+      if (campForm.dataset.step === 'name') { setJoinStep('char'); return; }
+      if (!campChar) return;
+      try { localStorage.setItem('campChar', campChar); } catch (err) {}
       campJoinBtn.disabled = true;
       campStatus.textContent = 'Connecting…';
       try {
         if (CAMP_BACKEND === 'firebase') {
-          await joinCampfireFirebase(name);
+          await joinCampfireFirebase(name, campChar);
         } else {
           await loadMqtt();
           await joinCampfire(name);
@@ -4694,11 +5265,11 @@
     }
 
     // ---- firebase version ----
-    async function joinCampfireFirebase(name) {
+    async function joinCampfireFirebase(name, character) {
       const session = ++campSession;
       const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), CAMP_JOIN_TIMEOUT));
       const joining = import('./js/rooms.js').then(rooms =>
-        rooms.joinRoom(CAMP_ROOM, name, { max: CAMP_MAX }).then(me => ({ rooms, me })));
+        rooms.joinRoom(CAMP_ROOM, name, { max: CAMP_MAX, character }).then(me => ({ rooms, me })));
 
       let rooms, me;
       try {
@@ -4711,15 +5282,16 @@
       }
       if (session !== campSession) { me.leave(); throw { stale: true }; }
 
-      campMe = { id: me.uid, name: me.name, spot: me.spot, ts: Date.now() };
+      campMe = { id: me.uid, name: me.name, spot: me.spot, character: me.character, ts: Date.now() };
       campers = new Map([[me.uid, campMe]]);
       const stopWatching = rooms.watchPlayers(CAMP_ROOM, players => {
         if (session !== campSession) return;
-        campers = new Map(players.map(p => [p.uid, { id: p.uid, name: p.name, spot: p.spot, ts: p.lastSeen }]));
+        campers = new Map(players.map(p => [p.uid, { id: p.uid, name: p.name, spot: p.spot, character: p.character, ts: p.lastSeen }]));
         campers.set(me.uid, campMe); // you always see yourself
         layoutCampRing();
       });
       fbCamp = { me, stopWatching };
+      startBattleWatch(session);
 
       campScene.classList.remove('camp-scene-joining');
       campStatus.textContent = '';
@@ -4728,9 +5300,11 @@
 
     function leaveCampfire() {
       campSession++;
+      stopBattle(); // admin leaving ends a battle they're running
       if (fbCamp) {
         fbCamp.stopWatching();
-        fbCamp.me.leave(); // intentional: rooms.js stops its heartbeat and won't rejoin
+        if (fbCamp.stopBattle) fbCamp.stopBattle();
+        if (fbCamp.me) fbCamp.me.leave(); // intentional: rooms.js stops its heartbeat and won't rejoin
         fbCamp = null;
       }
       campTimers.forEach(clearInterval);
@@ -4742,6 +5316,7 @@
       }
       campClient = null;
       campMe = null;
+      campAdminView = false;
       campers = new Map();
       campScene.classList.remove('camp-scene-joining');
       layoutCampRing();
@@ -4751,23 +5326,28 @@
       if (campClient && campMe) campClient.publish(CAMP_TOPIC + campMe.id, '', { retain: true, qos: 0 });
     });
 
-    // one log per camper (never fewer than 4), spaced evenly in a circle around the fire.
-    // The circle widens as people join; once it reaches the edge of the screen the logs shrink instead.
+    // one seat per camper (never fewer than 4), spaced evenly in a circle around the fire.
+    // The circle widens as people join; once it reaches the edge of the screen the seats get
+    // closer together and the circles smaller instead.
     function layoutCampRing() {
       const list = [...campers.values()].sort((a, b) => a.spot - b.spot || (a.id < b.id ? -1 : 1));
       const n = Math.max(4, list.length);
       const W = campScene.clientWidth, H = campScene.clientHeight;
       if (!W || !H) return;
       const fireR = campFire.offsetWidth / 2;
-      const maxR = Math.min(W, H) / 2 - Math.max(40, Math.min(W, H) * 0.07);
+      // the fire isn't centred, so the circle can only reach as far as the nearest edge
+      const cx = campFire.offsetLeft, cy = campFire.offsetTop;
+      const maxR = Math.min(cx, W - cx, cy, H - cy) - Math.max(40, Math.min(W, H) * 0.07);
       let logW = Math.min(fireR * 1.25, 200);
-      let R = Math.max(fireR + logW * 0.35, (n * logW * 1.25) / (2 * Math.PI));
+      // characters stand with their feet on the seat, so leave room for one below the fire
+      let R = Math.max(fireR + logW * 0.35, fireR + Math.min(140, logW * 1.15) * 0.5, (n * logW * 1.25) / (2 * Math.PI));
       if (R > maxR) {
         R = Math.max(maxR, fireR + 30);
         logW = (2 * Math.PI * R) / (n * 1.25);
       }
 
-      // each camper takes the log closest to their random spot; if it's taken, the next free one
+      // logW is the spacing between seats (they used to be logs).
+      // Each camper takes the seat closest to their random spot; if it's taken, the next free one
       const seatOf = new Map();
       const taken = new Array(n).fill(false);
       list.forEach(c => {
@@ -4777,30 +5357,13 @@
         seatOf.set(c.id, s);
       });
 
-      const logs = [...campRing.querySelectorAll('.camp-log')];
-      while (logs.length < n) {
-        const log = document.createElement('div');
-        log.className = 'camp-log';
-        log.innerHTML = `<img src="${LOG_IMG}" alt="">`;
-        campRing.appendChild(log);
-        logs.push(log);
-      }
-      while (logs.length > n) logs.pop().remove();
-
       const pos = i => {
         const a = (i / n) * 2 * Math.PI;
-        return { x: R * Math.sin(a), y: -R * Math.cos(a), deg: (i / n) * 360 };
+        return { x: R * Math.sin(a), y: -R * Math.cos(a) };
       };
-      logs.forEach((log, i) => {
-        const p = pos(i);
-        log.style.setProperty('--log-w', logW + 'px');
-        log.style.setProperty('--lx', p.x + 'px');
-        log.style.setProperty('--ly', p.y + 'px');
-        log.style.setProperty('--rot', p.deg + 'deg');
-        log.classList.toggle('taken', taken[i]);
-      });
 
       const size = Math.max(18, Math.min(44, logW * 0.32));
+      const spriteSize = Math.max(64, Math.min(140, logW * 1.15));
       const existing = new Map([...campRing.querySelectorAll('.camp-player')].map(el => [el.dataset.id, el]));
       list.forEach(c => {
         let el = existing.get(c.id);
@@ -4809,25 +5372,522 @@
           el = document.createElement('div');
           el.className = 'camp-player';
           el.dataset.id = c.id;
-          el.innerHTML = '<span class="camp-name"></span>';
+          el.innerHTML = '<div class="camp-sprite"></div><span class="camp-hearts"></span><span class="camp-name"></span>';
           campRing.appendChild(el);
+        }
+        // their character, or the plain white circle if they didn't pick one
+        const character = charById.get(c.character);
+        if (el.dataset.char !== (c.character || '')) {
+          el.dataset.char = c.character || '';
+          el.classList.toggle('has-char', !!character);
+          const sprite = el.querySelector('.camp-sprite');
+          if (character) setSprite(sprite, character);
+          else sprite.removeAttribute('style');
         }
         const isMe = campMe && c.id === campMe.id;
         el.classList.toggle('me', !!isMe);
         el.querySelector('.camp-name').textContent = isMe ? c.name + ' (you)' : c.name;
         const p = pos(seatOf.get(c.id));
         el.style.setProperty('--p', size + 'px');
+        el.style.setProperty('--sprite', spriteSize + 'px');
+        if (!el.classList.contains('fighting')) el.classList.toggle('face-left', p.x > 1); // characters face the fire
         el.style.setProperty('--lx', p.x + 'px');
         el.style.setProperty('--ly', p.y + 'px');
         el.style.setProperty('--name-size', Math.max(11, Math.min(15, size * 0.42)) + 'px');
       });
       existing.forEach(el => el.remove());
 
-      campCount.hidden = !campMe;
+      campRingOuter = R + Math.max(logW * 0.3, size, spriteSize * 0.6) + 40;
+      applyBattleToRing();
+      updateAdminButtons();
+      campCount.hidden = !campMe && !campAdminView;
       campCount.textContent = `${list.length} / ${CAMP_MAX} around the fire`;
+
+      // admin list (only shown when admin is unlocked), alphabetical
+      campAdmin.hidden = !campMe && !campAdminView;
+      campAdmin.querySelector('h3').textContent = `Players (${list.length})`;
+      campAdmin.querySelector('ol').replaceChildren(...[...list]
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map(c => {
+          const li = document.createElement('li');
+          li.textContent = campMe && c.id === campMe.id ? c.name + ' (you)' : c.name;
+          return li;
+        }));
     }
 
     window.addEventListener('resize', () => { if (page.classList.contains('module-3')) layoutCampRing(); });
+
+    // ---- werewolves circling the campfire (decoration only, each screen runs its own) ----
+    // They walk an oval just outside the players, facing the way they're going, and pass behind
+    // each other by height on screen. Runs only while module 3 is open.
+    // In a battle a wolf leaves its path, runs at a player, fights, then runs back (see playTurnResult).
+    const wolfSheets = (dir, walk) => ({
+      walk:   { src: dir + walk,           frames: 11, ms: 90 },
+      run:    { src: dir + 'Run.png',      frames: 9,  ms: 70 },
+      attack: { src: dir + 'Attack_1.png', frames: 6 },
+      hurt:   { src: dir + 'Hurt.png',     frames: 2 },
+    });
+    const WOLF_SHEETS = [
+      wolfSheets('images/wolves/White_Werewolf/', 'Walk.png'),
+      wolfSheets('images/wolves/Black_Werewolf/', 'walk.png'),
+    ];
+    const campWolves = campScene.querySelector('.camp-wolves');
+    const wolves = WOLF_SHEETS.map((sheets, i) => {
+      const el = document.createElement('div');
+      el.className = 'camp-wolf';
+      campWolves.appendChild(el);
+      // start on opposite sides; mode: patrol (walk the path), move/return (run), hold (fighting)
+      const w = { el, sheets, angle: i * Math.PI, mode: 'patrol', x: 0, y: 0, face: 1, anim: null };
+      setWolfAnim(w, 'walk');
+      return w;
+    });
+    let wolfFrame = null;
+    let wolfLast = 0;
+    let wolfSize = 110;
+    const WOLF_SPEED = 55;  // pixels per second along the path
+    const WOLF_RUN = 420;   // pixels per second when charging
+
+    // loop a sheet, or play it once over `onceMs`
+    function setWolfAnim(w, kind, onceMs) {
+      if (!onceMs && w.anim === kind) return;
+      w.anim = kind;
+      const sheet = w.sheets[kind];
+      w.el.style.backgroundImage = `url("${sheet.src}")`;
+      w.el.style.setProperty('--frames', sheet.frames);
+      w.el.style.animation = 'none';
+      void w.el.offsetWidth; // restart
+      w.el.style.animation = onceMs
+        ? `wolf-anim ${onceMs}ms steps(${sheet.frames}) 1`
+        : `wolf-anim ${sheet.frames * sheet.ms}ms steps(${sheet.frames}) infinite`;
+    }
+
+    // run to a point (or back to the path with `back`); resolves on arrival
+    function wolfRun(w, x, y, back = false) {
+      return new Promise(resolve => {
+        w.mode = back ? 'return' : 'move';
+        w.target = { x, y };
+        w.arrived = resolve;
+      });
+    }
+
+    function stepWolves(now) {
+      if (!page.classList.contains('module-3')) { wolfFrame = null; return; }
+      const dt = Math.min((now - wolfLast) / 1000, 0.05);
+      wolfLast = now;
+      const W = campScene.clientWidth, H = campScene.clientHeight;
+      const size = Math.max(50, Math.min(130, Math.min(W, H) * 0.15));
+      wolfSize = size;
+      // the sprite's feet are near the bottom of its frame, so its feet sit on the path.
+      // The path is a rounded square (squarer than an oval) so on short screens the wolves
+      // keep to the edges, away from the players; it never leaves the screen.
+      const ring = campRingOuter || Math.min(W, H) * 0.3;
+      const cx = campFire.offsetLeft, cy = campFire.offsetTop; // centre of the fire
+      const rx = Math.min(Math.min(cx, W - cx) - size * 0.55, Math.max(ring + size, ring * 1.7));
+      const ry = Math.min(cy - size * 0.9 - 4, H - cy - size * 0.1 - 4, ring + size * 0.8);
+      const speed = WOLF_SPEED / ((rx + ry) / 2); // radians per second
+      const squarish = v => Math.sign(v) * Math.pow(Math.abs(v), 0.6);
+      const pathPoint = w => ({ x: cx + rx * squarish(Math.cos(w.angle)), y: cy + ry * squarish(Math.sin(w.angle)) });
+      wolves.forEach(w => {
+        if (w.mode === 'patrol') {
+          if (!rotatePaused) w.angle += speed * dt;
+          ({ x: w.x, y: w.y } = pathPoint(w));
+          // clockwise on screen: rightwards along the top, leftwards along the bottom; the sheet faces right
+          w.face = -Math.sin(w.angle) >= 0 ? 1 : -1;
+          setWolfAnim(w, 'walk');
+        } else if (w.mode === 'move' || w.mode === 'return') {
+          const t = w.mode === 'return' ? pathPoint(w) : w.target;
+          const dist = Math.hypot(t.x - w.x, t.y - w.y);
+          const step = rotatePaused ? 0 : WOLF_RUN * dt;
+          if (dist <= Math.max(step, 2)) {
+            w.x = t.x; w.y = t.y;
+            w.mode = w.mode === 'return' ? 'patrol' : 'hold';
+            const done = w.arrived; w.arrived = null;
+            if (done) done();
+          } else {
+            w.x += (t.x - w.x) / dist * step;
+            w.y += (t.y - w.y) / dist * step;
+            w.face = t.x >= w.x ? 1 : -1;
+            setWolfAnim(w, 'run');
+          }
+        } // 'hold': standing still while fighting; playTurnResult sets its animation
+        w.el.style.setProperty('--wolf', size + 'px');
+        w.el.style.zIndex = Math.round(w.y);
+        w.el.style.transform = `translate(${w.x - size / 2}px, ${w.y - size * 0.9}px) scaleX(${w.face})`;
+      });
+      wolfFrame = requestAnimationFrame(stepWolves);
+    }
+
+    // ---- wolf battle (module 3) ----
+    // Admin presses Start. Turns go round the circle in join order: the player whose turn it is
+    // gets a question and 10 seconds. Right: the wolf charges and the player fights it off.
+    // Wrong or too slow: the wolf bites, they lose 1 of 2 lives, and at 0 they die and vanish.
+    // After 3 rounds, survivors win. The admin's screen runs the game (js/battle.js); every
+    // screen plays the same animations from the shared battle doc.
+    const BATTLE_ROUNDS = 3;
+    const BATTLE_LIVES = 2;
+    const TURN_MS = 10000;    // time to answer
+    const RESULT_MS = 7000;   // time for the fight animation before the next turn
+    const SURVIVOR_COINS = 5;
+
+    // PLACEHOLDER questions until the group sends the real Chapter 7 & 8 ones.
+    // `answer` is the index of the correct choice (0 = A).
+    const CAMP_QUESTIONS = [
+      { question: 'Who decides whether care was culturally safe?', choices: ['The nurse', 'The hospital', 'The person receiving care', 'The doctor'], answer: 2 },
+      { question: 'What is the first step toward giving culturally safe care?', choices: ['Learning one fact about every culture', 'Reflecting on your own culture, beliefs and biases', 'Treating every patient exactly the same', 'Asking family members to translate'], answer: 1 },
+      { question: 'What does cultural humility involve?', choices: ['Becoming an expert on other cultures', 'Lifelong self-reflection and learning from patients', 'Avoiding talk about culture', 'Following the same plan for everyone'], answer: 1 },
+      { question: 'Why use a professional interpreter instead of a family member?', choices: ['It is faster', 'Family members are not allowed in the room', 'For accuracy and the patient\'s confidentiality', 'Interpreters make decisions for the patient'], answer: 2 },
+      { question: 'What is ethnocentrism?', choices: ['Believing your own culture is the right or best one', 'Respecting all cultures equally', 'Studying many cultures', 'Speaking more than one language'], answer: 0 },
+      { question: 'What is stereotyping?', choices: ['Asking a patient about their beliefs', 'Assuming everyone in a group is the same', 'Using an interpreter', 'Learning about a patient\'s values'], answer: 1 },
+      { question: 'A patient refuses a treatment because of their beliefs. What should the nurse do first?', choices: ['Insist the treatment is given', 'Document it and move on', 'Respectfully explore their beliefs and look for options together', 'Ask the family to convince them'], answer: 2 },
+      { question: 'In the nurse-patient relationship, who usually holds more power?', choices: ['The patient', 'The nurse', 'Both equally', 'Neither'], answer: 1 },
+      { question: 'Which question best supports culturally safe care?', choices: ['"You people usually do this, right?"', '"Is there anything important to you that we should include in your care?"', '"Why don\'t you just follow the plan?"', '"Can your son answer for you?"'], answer: 1 },
+      { question: 'Cultural safety mainly aims to address...', choices: ['Language barriers only', 'Power imbalances and discrimination in care', 'Hospital budgets', 'Food preferences only'], answer: 1 },
+    ];
+
+    const battleBanner = campScene.querySelector('.battle-banner');
+    const battleBox = campScene.querySelector('.battle-question');
+    const battleTimerFill = battleBox.querySelector('.battle-timer-fill');
+    const battleStartBtn = document.getElementById('battle-start');
+    const battleEndBtn = document.getElementById('battle-end');
+    let battleMod = null;           // js/battle.js once loaded
+    let battle = null;              // latest shared battle state
+    let battleKey = '';             // which turn/phase we've already reacted to
+    let battleSeq = Promise.resolve(); // fight animations play one after another
+    let battleHost = null;          // set while this (admin) screen runs the battle
+    let battleBannerUntil = 0;
+    let questionTurn = 0;           // turn number of the question on screen
+    const fightingNow = new Set();  // players mid-animation: keep their old hearts, don't hide yet
+    const coinsGiven = new Set();
+    let battleClock = null;
+
+    const myCampUid = () => (fbCamp && fbCamp.me ? fbCamp.me.uid : null);
+    const battleName = (st, uid) => (st.names && st.names[uid]) || (campers.get(uid) || {}).name || 'Someone';
+    const isRunning = () => !!(battle && battle.status === 'running');
+    const delay = ms => new Promise(r => setTimeout(r, ms));
+
+    function startBattleWatch(session) {
+      import('./js/battle.js').then(B => {
+        battleMod = B;
+        if (session !== campSession || !fbCamp) return;
+        fbCamp.stopBattle = B.watchBattle(CAMP_ROOM, st => { if (session === campSession) onBattle(st); });
+        if (!battleClock) battleClock = setInterval(battleTick, 200);
+        updateAdminButtons();
+      }).catch(err => console.error('battle:', err));
+    }
+
+    // leaving the campfire: forget the battle on this screen (and end it if we were running it)
+    function stopBattle() {
+      if (battleHost) {
+        if (isRunning() && battle.host === battleHost.uid) {
+          battleMod.writeBattle(CAMP_ROOM, { ...battle, status: 'over', result: null, phase: 'result' }, { newPhase: true }).catch(() => {});
+        }
+        stopHosting();
+      }
+      clearInterval(battleClock);
+      battleClock = null;
+      battle = null;
+      battleKey = '';
+      fightingNow.clear();
+      battleBox.hidden = true;
+      battleBanner.hidden = true;
+    }
+
+    function onBattle(st) {
+      battle = st;
+      if (!isRunning()) {
+        battleBox.hidden = true;
+        if (st && st.status === 'over' && !st.pending) showBattleEnd(st);
+      } else {
+        const key = `${st.battleId}:${st.turnId}:${st.phase}`;
+        if (key !== battleKey && !st.pending) {
+          battleKey = key;
+          if (st.phase === 'question') startTurn(st);
+          else onTurnResult(st);
+        }
+      }
+      applyBattleToRing();
+      updateAdminButtons();
+    }
+
+    function startTurn(st) {
+      const uid = st.order[st.turnIdx];
+      battleBannerUntil = 0;
+      if (uid !== myCampUid()) { battleBox.hidden = true; return; }
+      // your turn: show the question
+      const q = CAMP_QUESTIONS[st.qIndex % CAMP_QUESTIONS.length];
+      questionTurn = st.turnId;
+      battleBox.querySelector('.battle-q-text').textContent = q.question;
+      const choices = battleBox.querySelector('.battle-choices');
+      choices.replaceChildren(...q.choices.map((text, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.innerHTML = `<b>${'ABCD'[i]}</b><span></span>`;
+        btn.lastChild.textContent = text;
+        btn.addEventListener('click', () => {
+          battleBox.hidden = true; // the box disappears straight away
+          battleMod.submitAnswer(CAMP_ROOM, st.turnId, i).catch(err => console.error('answer:', err));
+        });
+        return btn;
+      }));
+      battleBox.hidden = false;
+    }
+
+    function onTurnResult(st) {
+      const r = st.result;
+      battleBox.hidden = true;
+      if (!r) return;
+      if (r.uid === myCampUid() && r.correct && !coinsGiven.has(battleKey)) {
+        coinsGiven.add(battleKey);
+        addPoints(1);
+      }
+      const who = battleName(st, r.uid);
+      setBanner(r.correct ? `${who} fought off the wolf!`
+        : (r.timedOut ? `${who} ran out of time!` : `${who} got it wrong!`) + (r.dead ? ` ${who} is out!` : ''), RESULT_MS);
+      fightingNow.add(r.uid);
+      battleSeq = battleSeq
+        .then(() => playTurnResult(st))
+        .catch(err => console.error('fight:', err))
+        .finally(() => { fightingNow.delete(r.uid); applyBattleToRing(); });
+    }
+
+    function showBattleEnd(st) {
+      const key = st.battleId + ':over';
+      if (coinsGiven.has(key)) return;
+      coinsGiven.add(key);
+      // only celebrate a battle that just finished, not one from earlier in the day
+      if (battleMod && battleMod.serverNow() - st.updatedAt > 30000) return;
+      const alive = st.order.filter(u => st.lives[u] > 0);
+      const me = myCampUid();
+      if (me && alive.includes(me)) addPoints(SURVIVOR_COINS);
+      setBanner(alive.length
+        ? `Battle over! Survivors: ${alive.map(u => battleName(st, u)).join(', ')}`
+        : 'Battle over! The wolves won this time.', 10000);
+    }
+
+    function setBanner(text, ms) {
+      battleBanner.textContent = text;
+      battleBanner.hidden = false;
+      battleBannerUntil = performance.now() + ms;
+    }
+
+    // every 200ms: countdowns, banner, and (on the admin's screen) running the game
+    function battleTick() {
+      if (battleHost) hostTick();
+      const now = performance.now();
+      if (isRunning() && battle.phase === 'question' && battleMod) {
+        const left = Math.min(TURN_MS, Math.max(0, TURN_MS - (battleMod.serverNow() - battle.phaseAt)));
+        const secs = Math.ceil(left / 1000);
+        const uid = battle.order[battle.turnIdx];
+        const round = `Round ${battle.round}/${battle.maxRounds}`;
+        battleBanner.textContent = uid === myCampUid() ? `Your turn! ${secs}s · ${round}` : `${battleName(battle, uid)}'s turn · ${secs}s · ${round}`;
+        battleBanner.hidden = false;
+        battleTimerFill.style.transform = `scaleX(${left / TURN_MS})`;
+        if (left <= 0 && questionTurn === battle.turnId) battleBox.hidden = true;
+      } else if (battleBannerUntil && now > battleBannerUntil) {
+        battleBanner.hidden = true;
+        battleBannerUntil = 0;
+      }
+    }
+
+    // hearts, turn glow and who's dead, on every player
+    function applyBattleToRing() {
+      const running = isRunning();
+      campRing.querySelectorAll('.camp-player').forEach(el => {
+        const uid = el.dataset.id;
+        const inBattle = running && battle.order.includes(uid);
+        let lives = inBattle ? Math.max(0, battle.lives[uid] || 0) : 0;
+        // the wolf hasn't reached them yet: show the hearts they had before this turn
+        if (inBattle && fightingNow.has(uid) && battle.result && battle.result.uid === uid && !battle.result.correct) lives += 1;
+        const hearts = el.querySelector('.camp-hearts');
+        if (hearts) hearts.textContent = inBattle ? '❤'.repeat(lives) + '♡'.repeat(Math.max(0, BATTLE_LIVES - lives)) : '';
+        el.classList.toggle('dead', inBattle && lives <= 0 && !fightingNow.has(uid));
+        el.classList.toggle('turn', running && battle.phase === 'question' && battle.order[battle.turnIdx] === uid);
+      });
+    }
+
+    // ---- fight animation (every screen) ----
+    const playerEl = uid => [...campRing.querySelectorAll('.camp-player')].find(el => el.dataset.id === uid);
+
+    // play one of a character's fight sheets once; `hold` keeps the last frame (for dying)
+    function playChar(el, kind, hold = false) {
+      const character = charById.get(el.dataset.char);
+      const sprite = el.querySelector('.camp-sprite');
+      if (!character) return delay(500); // a plain circle has no animation
+      const sheet = character.fight[kind];
+      const ms = sheet.frames * 110;
+      sprite.style.backgroundImage = `url("${sheet.src}")`;
+      sprite.style.setProperty('--frames', sheet.frames);
+      sprite.style.animation = 'none';
+      void sprite.offsetWidth;
+      sprite.style.animation = `char-idle ${ms}ms steps(${sheet.frames}) 1`;
+      return delay(ms).then(() => {
+        sprite.style.animation = 'none';
+        if (hold) {
+          sprite.style.backgroundPosition = `calc(var(--sprite) * ${-(sheet.frames - 1)}) 0`;
+        } else {
+          sprite.style.animation = '';
+          sprite.style.backgroundPosition = '';
+          setSprite(sprite, character); // back to standing ready
+        }
+      });
+    }
+
+    function playWolf(w, kind, ms) {
+      setWolfAnim(w, kind, ms);
+      return delay(ms);
+    }
+
+    async function playTurnResult(st) {
+      const r = st.result;
+      const el = playerEl(r.uid);
+      if (!el || !page.classList.contains('module-3')) return;
+      const wolf = wolves[st.turnId % wolves.length];
+      // where the player's feet are
+      const px = campFire.offsetLeft + parseFloat(el.style.getPropertyValue('--lx') || 0);
+      const py = campFire.offsetTop + parseFloat(el.style.getPropertyValue('--ly') || 0);
+      const sprite = parseFloat(el.style.getPropertyValue('--sprite')) || 80;
+      const side = wolf.x < px ? -1 : 1; // the wolf comes from its own side
+      await wolfRun(wolf, px + side * (sprite * 0.3 + wolfSize * 0.3), py);
+      // face each other
+      wolf.face = -side;
+      el.classList.add('fighting');
+      el.classList.toggle('face-left', side < 0);
+      if (r.correct) {
+        await Promise.all([
+          playChar(el, 'attack'),
+          delay(300).then(() => playWolf(wolf, 'hurt', 500)),
+        ]);
+      } else {
+        await playWolf(wolf, 'attack', 600);
+        await playChar(el, 'hurt');
+        if (r.dead) {
+          await playChar(el, 'dead', true);
+          await delay(400);
+        }
+      }
+      el.classList.remove('fighting');
+      if (r.dead) {
+        fightingNow.delete(r.uid);
+        applyBattleToRing(); // fades them out
+        await delay(600);
+        const s2 = el.querySelector('.camp-sprite');
+        s2.style.animation = '';
+        s2.style.backgroundPosition = '';
+      }
+      layoutCampRing(); // face the fire again
+      await wolfRun(wolf, 0, 0, true); // back to its spot on the path
+    }
+
+    // ---- running the battle (admin's screen only) ----
+    function updateAdminButtons() {
+      const running = isRunning();
+      battleStartBtn.disabled = running || !battleMod || !isAdmin || campers.size === 0;
+      battleEndBtn.disabled = !running || !battleMod;
+    }
+
+    function pickQuestion(used) {
+      const free = CAMP_QUESTIONS.map((_, i) => i).filter(i => !used.includes(i));
+      const pool = free.length ? free : CAMP_QUESTIONS.map((_, i) => i);
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    async function hostWrite(st, newPhase = true) {
+      if (!battleHost) return;
+      battleHost.busy = true;
+      try { await battleMod.writeBattle(CAMP_ROOM, st, { newPhase }); }
+      catch (err) { console.error('battle write:', err); }
+      finally { if (battleHost) battleHost.busy = false; }
+    }
+
+    async function startHosting() {
+      if (battleHost) return;
+      const uid = await battleMod.myUid();
+      battleHost = { uid, busy: false, answers: new Map() };
+      battleHost.stopAnswers = battleMod.watchAnswers(CAMP_ROOM, m => { if (battleHost) battleHost.answers = m; });
+    }
+
+    function stopHosting() {
+      if (!battleHost) return;
+      battleHost.stopAnswers();
+      battleHost = null;
+    }
+
+    battleStartBtn.addEventListener('click', async () => {
+      if (isRunning() || !battleMod || !isAdmin || !campers.size) return;
+      battleStartBtn.disabled = true;
+      await startHosting();
+      const order = [...campers.keys()]; // join order
+      const qIndex = pickQuestion([]);
+      await hostWrite({
+        host: battleHost.uid,
+        battleId: Date.now().toString(36),
+        status: 'running',
+        order,
+        names: Object.fromEntries(order.map(u => [u, campers.get(u).name])),
+        lives: Object.fromEntries(order.map(u => [u, BATTLE_LIVES])),
+        round: 1,
+        maxRounds: BATTLE_ROUNDS,
+        turnIdx: 0,
+        turnId: 1,
+        qIndex,
+        used: [qIndex],
+        phase: 'question',
+        result: null,
+      });
+    });
+
+    battleEndBtn.addEventListener('click', async () => {
+      if (!isRunning() || !battleMod) return;
+      if (!confirm('End the battle now?')) return;
+      await startHosting();
+      await hostWrite({ ...battle, host: battleHost.uid, status: 'over', phase: 'result', result: null });
+      stopHosting();
+    });
+
+    function hostTick() {
+      const st = battle;
+      if (!battleHost || battleHost.busy || !st || st.pending) return;
+      if (st.status !== 'running' || st.host !== battleHost.uid) { stopHosting(); return; }
+      const now = battleMod.serverNow();
+      if (st.phase === 'question') {
+        const uid = st.order[st.turnIdx];
+        if (!campers.has(uid)) { hostAdvance(st); return; } // they left the fire: skip them
+        const a = battleHost.answers.get(uid);
+        const answered = !!a && a.turn === st.turnId;
+        if (!answered && now - st.phaseAt < TURN_MS + 500) return; // still thinking
+        const q = CAMP_QUESTIONS[st.qIndex % CAMP_QUESTIONS.length];
+        const correct = answered && a.choice === q.answer;
+        const lives = { ...st.lives };
+        if (!correct) lives[uid] = Math.max(0, (lives[uid] || 0) - 1);
+        hostWrite({ ...st, lives, phase: 'result', result: { uid, correct, timedOut: !answered, dead: lives[uid] === 0 } });
+      } else if (now - st.phaseAt > RESULT_MS) {
+        hostAdvance(st);
+      }
+    }
+
+    // next living player who's still here; a new round when it wraps; over after the last round
+    function hostAdvance(st) {
+      let idx = st.turnIdx, round = st.round, next = -1;
+      for (let k = 0; k < st.order.length * (st.maxRounds + 1); k++) {
+        idx++;
+        if (idx >= st.order.length) { idx = 0; round++; }
+        if (round > st.maxRounds) break;
+        const u = st.order[idx];
+        if (st.lives[u] > 0 && campers.has(u)) { next = idx; break; }
+      }
+      if (next < 0) {
+        hostWrite({ ...st, status: 'over', phase: 'result', result: null });
+        return;
+      }
+      const qIndex = pickQuestion(st.used || []);
+      hostWrite({ ...st, turnIdx: next, round, turnId: st.turnId + 1, qIndex, used: [...(st.used || []), qIndex], phase: 'question', result: null });
+    }
+
+    function startWolves() {
+      if (wolfFrame) return;
+      wolfLast = performance.now();
+      wolfFrame = requestAnimationFrame(stepWolves);
+    }
 
     back.addEventListener('click', () => {
       page.className = 'page hidden';
@@ -4852,6 +5912,35 @@
         el.style.animation = '';
       });
     });
+
+    // ---- mobile: "rotate your device" during games in portrait ----
+    // Shown only when Mobile was picked, a game is open (module 1, 2, or module 3 after
+    // joining, not its name box) and the phone is upright. It only covers and pauses the
+    // screen; nothing is reloaded and multiplayer keeps running underneath.
+    const rotateEl = document.getElementById('rotate-device');
+    const portraitQuery = window.matchMedia('(orientation: portrait)');
+    let rotatePaused = false;
+
+    function updateRotateScreen() {
+      const inGame = !page.classList.contains('hidden') && /(^| )module-[123]( |$)/.test(page.className)
+        && !(page.classList.contains('module-3') && campScene.classList.contains('camp-scene-joining'));
+      const show = document.body.dataset.device === 'mobile' && inGame && portraitQuery.matches;
+      if (show === rotatePaused) return;
+      rotatePaused = show;
+      rotateEl.hidden = !show;
+      document.body.classList.toggle('rotate-paused', show);
+      if (show && document.activeElement && page.contains(document.activeElement)) document.activeElement.blur();
+    }
+
+    if (portraitQuery.addEventListener) portraitQuery.addEventListener('change', updateRotateScreen);
+    else portraitQuery.addListener(updateRotateScreen); // older iOS Safari
+    window.addEventListener('resize', updateRotateScreen);
+    window.addEventListener('orientationchange', updateRotateScreen);
+    // entering/leaving a game, and joining the campfire, all show up as class changes
+    const rotateWatch = new MutationObserver(updateRotateScreen);
+    rotateWatch.observe(page, { attributes: true, attributeFilter: ['class'] });
+    rotateWatch.observe(campScene, { attributes: true, attributeFilter: ['class'] });
+    rotateWatch.observe(document.body, { attributes: true, attributeFilter: ['data-device'] });
   </script>
 </body>
 </html>

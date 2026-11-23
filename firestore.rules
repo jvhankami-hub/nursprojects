@@ -2,9 +2,11 @@ rules_version = '2';
 
 // Paste this into Firebase Console > Firestore Database > Rules, then click Publish.
 //
-// Matches js/rooms.js. The only data is:
-//   rooms/{roomId}/players/{uid}  ->  { name, spot, joinedAt, lastSeen }
-// and the only operations are:
+// Matches js/rooms.js and js/battle.js. The only data is:
+//   rooms/{roomId}/players/{uid}  ->  { name, spot, joinedAt, lastSeen, character? }
+//   rooms/{roomId}/battle/state   ->  the module 3 wolf battle, written by its host (admin)
+//   rooms/{roomId}/answers/{uid}  ->  { turn, choice, at }  a player's answer to their turn
+// and the only player operations are:
 //   list the players in a room   (getDocs / onSnapshot on the players collection)
 //   join     = setDoc on your own doc   (create, or overwrite a leftover doc of yours)
 //   heartbeat = updateDoc of lastSeen only
@@ -25,11 +27,18 @@ service cloud.firestore {
       return roomId in ['campfire', '_connection-test'];
     }
 
+    // The characters players can pick in module 3 (images/gangsters, homeless, soldiers).
+    function isCharacter(c) {
+      return c in ['gangster-1', 'gangster-2', 'gangster-3',
+                   'homeless-1', 'homeless-2', 'homeless-3',
+                   'soldier-1', 'soldier-2', 'soldier-3'];
+    }
+
     // A complete, valid player document as written by joinRoom():
-    // exactly these 4 fields, a trimmed 1-20 character name, a spot in [0, 1),
-    // and both timestamps set by the server (serverTimestamp() == request.time).
+    // these 4 fields plus an optional character, a trimmed 1-20 character name,
+    // a spot in [0, 1), and both timestamps set by the server (serverTimestamp() == request.time).
     function isValidJoin(data) {
-      return data.keys().hasOnly(['name', 'spot', 'joinedAt', 'lastSeen'])
+      return data.keys().hasOnly(['name', 'spot', 'joinedAt', 'lastSeen', 'character'])
           && data.keys().hasAll(['name', 'spot', 'joinedAt', 'lastSeen'])
           && data.name is string
           && data.name.size() >= 1
@@ -39,7 +48,8 @@ service cloud.firestore {
           && data.spot >= 0
           && data.spot < 1
           && data.joinedAt == request.time
-          && data.lastSeen == request.time;
+          && data.lastSeen == request.time
+          && (!('character' in data) || isCharacter(data.character));
     }
 
     // Heartbeat from rooms.js: only lastSeen changes, it must be the server time,
@@ -72,6 +82,55 @@ service cloud.firestore {
       // You can only remove yourself.
       allow delete: if signedIn() && knownRoom(roomId)
                     && request.auth.uid == uid;
+    }
+
+    // ---- module 3 wolf battle (js/battle.js) ----
+
+    // The whole battle lives in one doc, written only by its host (the admin's screen).
+    // Anyone may start a new battle when none is running, or take over one whose host has
+    // gone quiet for a minute (admin closed the tab), so a battle can never get stuck.
+    match /rooms/{roomId}/battle/{docId} {
+      allow get, list: if signedIn() && knownRoom(roomId);
+
+      allow create: if signedIn() && knownRoom(roomId) && docId == 'state'
+                    && isValidBattle(request.resource.data);
+
+      allow update: if signedIn() && knownRoom(roomId) && docId == 'state'
+                    && isValidBattle(request.resource.data)
+                    && (resource.data.host == request.auth.uid
+                        || resource.data.status != 'running'
+                        || request.time > resource.data.updatedAt + duration.value(60, 's'));
+
+      allow delete: if signedIn() && knownRoom(roomId)
+                    && resource.data.host == request.auth.uid;
+    }
+
+    function isValidBattle(data) {
+      return data.host == request.auth.uid
+          && data.updatedAt == request.time
+          && data.status in ['running', 'over']
+          && data.order is list && data.order.size() <= 20
+          && data.lives is map
+          && data.round is int && data.maxRounds is int && data.maxRounds <= 10
+          && data.turnIdx is int && data.turnId is int && data.qIndex is int
+          && data.phase in ['question', 'result'];
+    }
+
+    // Each player's answer to the current turn; you can only write your own.
+    match /rooms/{roomId}/answers/{uid} {
+      allow get, list: if signedIn() && knownRoom(roomId);
+
+      allow create, update: if signedIn() && knownRoom(roomId)
+                            && request.auth.uid == uid
+                            && request.resource.data.keys().hasOnly(['turn', 'choice', 'at'])
+                            && request.resource.data.keys().hasAll(['turn', 'choice', 'at'])
+                            && request.resource.data.turn is int
+                            && request.resource.data.choice is int
+                            && request.resource.data.choice >= 0
+                            && request.resource.data.choice <= 3
+                            && request.resource.data.at == request.time;
+
+      allow delete: if signedIn() && knownRoom(roomId) && request.auth.uid == uid;
     }
 
     // ---- everything else is locked ----
